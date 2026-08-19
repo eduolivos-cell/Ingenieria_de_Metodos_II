@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingeniería de Métodos II — Sesión 1: Distribución de Planta (Teoría)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>if(!window.THREE){document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>');}</script>
+<style>
+:root{--bg:#04040a;--cyan:#00f0ff;--magenta:#ff2ec4;--yellow:#ffe600;--green:#39ff14;--orange:#ff9500;--purple:#a855f7;--usil:#0b5cab;--gold:#c9a24b;--card:rgba(255,255,255,.05);--border:rgba(0,240,255,.25)}
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%}
+body{background:var(--bg);color:#eaf6ff;font-family:'Segoe UI',system-ui,Arial,sans-serif;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(1100px 600px at 82% -10%,rgba(0,240,255,.13),transparent 60%),radial-gradient(900px 520px at 8% 110%,rgba(255,46,196,.11),transparent 60%),radial-gradient(700px 420px at 50% 55%,rgba(168,85,247,.08),transparent 60%);animation:hue 14s ease-in-out infinite alternate}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;background-image:radial-gradient(1.5px 1.5px at 25% 35%,rgba(0,240,255,.8) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 75% 65%,rgba(255,46,196,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 50% 20%,rgba(255,230,0,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 12% 78%,rgba(57,255,20,.7) 50%,transparent 51%);background-size:340px 340px,420px 420px,260px 260px,380px 380px;animation:drift 90s linear infinite}
+@keyframes hue{to{filter:hue-rotate(40deg)}}@keyframes drift{to{background-position:340px 680px,-420px 840px,260px -520px,-380px 760px}}
+header{position:fixed;top:0;left:0;right:0;height:64px;z-index:50;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(5,6,16,.93);border-bottom:1px solid var(--border)}
+#logoWrap{background:#fff;border-radius:10px;padding:3px 10px;display:flex;align-items:center;flex-shrink:0}#logoWrap img{height:42px;display:block}
+.brand{font-weight:800;font-size:15px;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.head-info{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;font-size:12px}
+.chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);color:var(--cyan);background:rgba(0,240,255,.06);font-weight:600}
+.chip.doc{border-color:rgba(255,46,196,.45);color:var(--magenta);background:rgba(255,46,196,.07)}
+#progress{position:fixed;top:64px;left:0;height:3px;width:0;z-index:60;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow));box-shadow:0 0 14px var(--cyan);transition:width .45s}
+#stage{position:fixed;inset:64px 0 78px 0;z-index:10}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .55s;overflow-y:auto;padding:28px 5vw 60px}
+.slide.active{opacity:1;pointer-events:auto}
+h1.big{font-size:clamp(28px,4.8vw,58px);line-height:1.05;font-weight:900;background:linear-gradient(90deg,var(--cyan) 10%,var(--magenta) 55%,var(--yellow) 95%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(0,240,255,.35))}
+h2.sec{font-size:clamp(22px,3.2vw,34px);font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#9fd8e8;font-size:15px;margin-bottom:18px;max-width:920px;line-height:1.5}
+.kicker{display:inline-block;font-size:12px;letter-spacing:3px;color:var(--yellow);border:1px solid rgba(255,230,0,.4);padding:5px 14px;border-radius:20px;margin-bottom:14px;background:rgba(255,230,0,.06);text-transform:uppercase;font-weight:700}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;backdrop-filter:blur(6px)}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.neon-c{color:var(--cyan)}.neon-m{color:var(--magenta)}.neon-y{color:var(--yellow)}.neon-g{color:var(--green)}.neon-o{color:var(--orange)}.neon-p{color:var(--purple)}
+.tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:14px;margin:3px 4px 3px 0;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05)}
+.btn{cursor:pointer;border:1px solid var(--cyan);color:var(--cyan);background:rgba(0,240,255,.07);padding:10px 22px;border-radius:10px;font-size:15px;font-weight:700;text-transform:uppercase;transition:.25s;text-decoration:none;display:inline-block}
+.btn:hover{background:rgba(0,240,255,.2);box-shadow:0 0 18px rgba(0,240,255,.5);transform:translateY(-2px)}
+.btn.mg{border-color:var(--magenta);color:var(--magenta);background:rgba(255,46,196,.07)}.btn.yl{border-color:var(--yellow);color:var(--yellow);background:rgba(255,230,0,.07)}.btn.gr{border-color:var(--green);color:var(--green);background:rgba(57,255,20,.07)}
+.btn.sm{padding:6px 14px;font-size:12.5px}.btn.active-opt{background:rgba(0,240,255,.28);box-shadow:0 0 16px rgba(0,240,255,.55)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+footer{position:fixed;bottom:0;left:0;right:0;height:78px;z-index:50;display:flex;align-items:center;gap:16px;padding:0 22px;background:rgba(5,6,16,.93);border-top:1px solid var(--border)}
+#slideSlider{flex:1}#slideCounter{font-size:13px;color:#9fd8e8;min-width:64px;text-align:center;font-weight:700}
+.stat{font-size:26px;font-weight:900}.stat-lbl{font-size:11.5px;letter-spacing:1.5px;color:#8fb8c6;text-transform:uppercase}
+.tl-item{cursor:pointer;transition:.25s}.tl-item:hover{transform:translateY(-3px);box-shadow:0 0 20px rgba(0,240,255,.25)}
+canvas.view{width:100%;border:1px solid var(--border);border-radius:14px;background:rgba(0,0,10,.5)}
+.center{text-align:center}
+.note{border-left:4px solid var(--yellow);background:rgba(255,230,0,.06);padding:10px 14px;border-radius:0 10px 10px 0;font-size:13.5px;color:#f2ecc0;margin-top:12px}
+.katex{color:#fff}
+.flash .ans{display:none;margin-top:10px;border-left:3px solid var(--green);padding:8px 12px;background:rgba(57,255,20,.08);color:#c9ffd9;font-size:13.5px}
+.flash.open .ans{display:block}
+.aviso{border:2px dashed var(--magenta);background:rgba(255,46,196,.08);border-radius:14px;padding:18px;font-size:17px;font-weight:800;color:var(--magenta);text-align:center;box-shadow:0 0 24px rgba(255,46,196,.25)}
+svg{display:block;margin:0 auto}
+</style>
+</head>
+<body>
+<header>
+ <div id="logoWrap"><img src="USIL_logo.png" alt="USIL 30 años" onerror="this.onerror=null;this.style.display='none';document.getElementById('logoFallback').style.display='block';">
+  <svg id="logoFallback" viewBox="0 0 250 90" height="42" style="display:none"><text x="2" y="64" font-size="54" font-weight="700" fill="none" stroke="#c9a24b" stroke-width="2.5" font-family="Georgia,serif">30</text><circle cx="88" cy="36" r="24" fill="none" stroke="#c9a24b" stroke-width="3"/><text x="88" y="42" font-size="14" fill="#c9a24b" text-anchor="middle" font-family="Georgia,serif">años</text><text x="118" y="68" font-size="56" font-weight="800" fill="#0b5cab" font-family="Georgia,serif" font-style="italic">USIL</text></svg></div>
+ <div class="brand">⚙ INGENIERÍA DE MÉTODOS II · TEORÍA</div>
+ <div class="head-info"><span class="chip">Sesión 1 · Distribución de Planta</span><span class="chip doc">👷 Eduardo Olivos</span></div>
+</header>
+<div id="progress"></div>
+<div id="stage">
+
+<section class="slide active" id="s0"><div style="min-height:82%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+ <span class="kicker">Sesión 01 · 2026-II</span>
+ <h1 class="big">FUNDAMENTOS BÁSICOS DE<br>DISTRIBUCIÓN DE PLANTA</h1>
+ <p class="sub center" style="margin-top:14px">Los <b class="neon-c">seis principios</b> de Niebel para analizar y mejorar el <b class="neon-m">layout</b> del sistema productivo.</p>
+ <div class="card"><b class="neon-y">Curso:</b> Ingeniería de Métodos II | <b class="neon-y">Docente:</b> Eduardo Olivos</div>
+ <div class="btnrow" style="justify-content:center;margin-top:26px"><button class="btn" onclick="goTo(1)">▶ Iniciar la clase</button></div>
+</div></section>
+
+<section class="slide" id="s1"><span class="kicker">Hoja de ruta</span><h2 class="sec">🗺 Hoja de ruta de la sesión</h2>
+ <p class="sub">Haz clic en cada bloque (avanzamos al ritmo del grupo):</p>
+ <div class="grid g4">
+  <div class="card tl-item" onclick="goTo(2)"><div class="stat neon-c">🎯</div><div class="stat-lbl">Objetivo y reto</div></div>
+  <div class="card tl-item" onclick="goTo(4)"><div class="stat neon-y">🏭</div><div class="stat-lbl">Definición y estrategia</div></div>
+  <div class="card tl-item" onclick="goTo(5)"><div class="stat neon-m">🧠</div><div class="stat-lbl">Ejemplo 1 (flujos)</div></div>
+  <div class="card tl-item" onclick="goTo(9)"><div class="stat neon-g">📐</div><div class="stat-lbl">Los 6 principios</div></div>
+  <div class="card tl-item" onclick="goTo(11)"><div class="stat neon-o">🧩</div><div class="stat-lbl">Caso ElectroAndes</div></div>
+  <div class="card tl-item" onclick="goTo(15)"><div class="stat neon-p">🧊</div><div class="stat-lbl">3D y síntesis</div></div>
+  <div class="card tl-item" onclick="goTo(16)"><div class="stat neon-c">🎯</div><div class="stat-lbl">Repaso</div></div>
+  <div class="card tl-item" onclick="goTo(17)"><div class="stat neon-m">📢</div><div class="stat-lbl">Cierre</div></div>
+ </div>
+ <div class="note">💡 <b>Repasa con este archivo:</b> todas las preguntas de la evaluación salen de aquí.</div>
+</section>
+
+<section class="slide" id="s2"><span class="kicker">Momento 1 · Utilidad</span><h2 class="sec">🎯 Objetivo y reto</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Objetivo de la sesión</h3><p style="font-size:15px;line-height:1.6;margin-top:6px">Analizar una <b>distribución de planta existente</b> aplicando los <b>seis principios básicos</b> para identificar ineficiencias en el flujo de materiales y <b>proponer mejoras</b> de layout.</p>
+   <h3 class="neon-m" style="margin-top:14px">Reto · Caso ElectroAndes S.A.</h3><p style="font-size:13.5px;line-height:1.5;margin-top:6px">Flujo real A→B→C→D con distancias largas, cruces y congestión. Así se ve el problema:</p>
+   <div id="miniFlow" style="margin-top:8px"></div></div>
+  <div class="card"><h3 class="neon-y">Reflexión inicial</h3><p style="font-size:14px;line-height:1.6;margin-top:6px">¿Cómo impacta la distribución en el <b>tiempo de ciclo</b>, el <b>movimiento de materiales</b> y la <b>salud/motivación</b> del operario?</p>
+   <div class="note">🗺 La disposición física de los elementos es clave para la optimización.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s3"><span class="kicker">Innovación · Reflexiones</span><h2 class="sec">👁 Impacto del layout</h2>
+ <p class="sub">Pulsa cada dimensión y ve su impacto:</p>
+ <div class="btnrow" id="impBtns"></div>
+ <div class="card" id="impInfo" style="min-height:80px"><b class="neon-y">Selecciona una dimensión</b>.</div>
+</section>
+
+<section class="slide" id="s4"><span class="kicker">Definición técnica</span><h2 class="sec">🏭 Decisión estratégica</h2>
+ <div class="card" style="margin-bottom:14px"><p style="font-size:15px;line-height:1.6">La <b class="neon-c">Distribución de Planta</b> es la integración de <b>maquinaria, materiales, recursos humanos y servicios auxiliares</b> en una unidad operativa económica y segura; el “mapa” que dirige el flujo eficiente de energía y materia.</p>
+ <p style="font-size:13.5px;margin-top:10px;color:#f2ecc0">“No basta con que un método de trabajo sea eficiente individualmente; el entorno debe favorecer la integración de hombres, materiales y maquinaria.” — <b>Benjamin Niebel</b></p></div>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-y">Utilidad estratégica</h3><ul style="font-size:14px;line-height:2;padding-left:18px"><li>Reduce costes (transporte, esperas, inventario).</li><li>Maximiza seguridad y bienestar.</li><li>Facilita supervisión y control.</li><li>Provee flexibilidad para cambios/expansión.</li></ul></div>
+  <div class="card flash"><b class="neon-m">Evolución histórica</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">De un enfoque <b>intuitivo/artesanal</b> a una <b>disciplina científica</b>, impulsada por la Revolución Industrial: la configuración del espacio es factor crítico de eficiencia.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s5"><span class="kicker">Ejemplo 1 · ¿Cuál es mejor?</span><h2 class="sec">🧠 ¿Qué opina de cada distribución?</h2>
+ <p class="sub">Pulsa cada layout y observe las <b>líneas de flujo</b> (recorrido del material):</p>
+ <div class="btnrow">
+  <button class="btn sm active-opt" id="layB0" onclick="showLay(0)">LAYOUT A</button>
+  <button class="btn sm mg" id="layB1" onclick="showLay(1)">LAYOUT B</button>
+  <button class="btn sm gr" id="layB2" onclick="showLay(2)">LAYOUT C</button>
+ </div>
+ <div id="layPanel"></div>
+</section>
+
+<section class="slide" id="s6"><span class="kicker">Ventajas</span><h2 class="sec">✅ Ventajas de una buena distribución</h2>
+ <div class="grid g3">
+  <div class="card"><b class="neon-c">Orden</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Elimina desorden, recorridos excesivos y deficiencias ambientales.</p></div>
+  <div class="card"><b class="neon-c">Eficiencia</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Uso más eficiente de factores y espacio.</p></div>
+  <div class="card"><b class="neon-m">Condiciones</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Mejora las condiciones de trabajo.</p></div>
+  <div class="card"><b class="neon-m">Producción</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Incrementa la producción.</p></div>
+  <div class="card"><b class="neon-g">Riesgo</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Reduce riesgo al material/calidad y tiempo de producción.</p></div>
+  <div class="card"><b class="neon-g">Costo</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Reduce costo de fabricación y aumenta productividad.</p></div>
+ </div>
+</section>
+
+<section class="slide" id="s7"><span class="kicker">Objetivos primordiales</span><h2 class="sec">🎯 Seis metas del layout</h2>
+ <div class="grid g3">
+  <div class="card"><b class="neon-c">Reducir riesgos</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Diseño ergonómico y organización del espacio.</p></div>
+  <div class="card"><b class="neon-c">Elevar moral</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Ambiente ordenado mejora satisfacción y bienestar.</p></div>
+  <div class="card"><b class="neon-m">Incrementar producción</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Flujos continuos; elimina cuellos de botella.</p></div>
+  <div class="card"><b class="neon-m">Minimizar retrasos</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Almacenamiento eficiente y secuenciación lógica.</p></div>
+  <div class="card"><b class="neon-g">Optimizar espacio</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Aprovechar el volumen/altura, no solo lo horizontal.</p></div>
+  <div class="card"><b class="neon-g">Reducir manejo</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">“El mejor manejo de materiales es el que <b>no se realiza</b>.”</p></div>
+ </div>
+</section>
+
+<section class="slide" id="s8"><span class="kicker">Tipos de sistemas</span><h2 class="sec">🏗 Tipos de sistemas de producción</h2>
+ <div class="grid g3">
+  <div class="card flash"><b class="neon-c">Por Proyecto</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver ejemplos</button><div class="ans">Construcción de edificios, aviones y barcos.</div></div>
+  <div class="card flash"><b class="neon-m">Por Lotes (Job‑Shop)</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver ejemplos</button><div class="ans">Productos diferentes en las mismas instalaciones: muebles a medida, panadería.</div></div>
+  <div class="card flash"><b class="neon-g">Continua</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver ejemplos</button><div class="ans">Siempre el mismo producto en la misma instalación: gaseosas.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s9"><span class="kicker">Los 6 principios de Niebel</span><h2 class="sec">📐 Principios básicos</h2>
+ <p class="sub">Pulsa cada principio:</p>
+ <div class="btnrow" id="priBtns"></div>
+ <div class="card" id="priInfo" style="min-height:90px"><b class="neon-y">Selecciona un principio</b>.</div>
+</section>
+
+<section class="slide" id="s10"><span class="kicker">Práctica · V/F</span><h2 class="sec">🧠 Verdadero o Falso</h2>
+ <div class="grid g2">
+  <div class="card flash"><b class="neon-y">1.</b> “La flexibilidad permite cambios con grandes costes.”<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans"><b>FALSO</b>: la flexibilidad permite adaptaciones futuras <b>sin</b> reconfiguraciones costosas ni interrupciones significativas.</div></div>
+  <div class="card flash"><b class="neon-y">2.</b> “El principio de flujo óptimo busca secuencias lógicas (línea, U, L) sin retrocesos.”<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans"><b>VERDADERO</b>: minimiza retrocesos y cruces innecesarios.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s11"><span class="kicker">Caso ElectroAndes · Actual</span><h2 class="sec">🧩 Evaluación de la distribución actual</h2>
+ <div id="bigFlow" style="margin-bottom:12px"></div>
+ <p class="sub">Pulsa cada principio para ver su evaluación:</p>
+ <div class="btnrow" id="evBtns"></div>
+ <div class="card" id="evInfo" style="min-height:100px"><b class="neon-y">Selecciona un principio</b>.</div>
+</section>
+
+<section class="slide" id="s12"><span class="kicker">Caso ElectroAndes · Propuesta</span><h2 class="sec">🛠 Nuevo layout y beneficios</h2>
+ <div id="propFlow" style="margin-bottom:12px"></div>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-g">Beneficios</h3><ul style="font-size:14px;line-height:2;padding-left:18px"><li>Reduce distancia recorrida de materiales.</li><li>Elimina cruces de transporte.</li><li>Mejora flujo continuo.</li><li>Incrementa seguridad operativa.</li><li>Facilita futuras ampliaciones.</li></ul></div>
+  <div class="card"><h3 class="neon-y">Conclusión del caso</h3><p style="font-size:14px;line-height:1.6;margin-top:6px">La distribución original <b>no cumple</b> la mayoría de principios. Reorganizar según el <b>flujo productivo</b> mejora la eficiencia, reduce transporte, aumenta seguridad y optimiza el espacio.</p></div>
+ </div>
+</section>
+
+<section class="slide" id="s13"><span class="kicker">Chart.js · Cumplimiento</span><h2 class="sec">📈 Actual vs. Propuesto (score 0–10)</h2>
+ <div class="grid g2">
+  <div class="card"><canvas id="chartPrin" style="height:280px"></canvas></div>
+  <div class="card"><h3 class="neon-y">Lectura</h3><ul style="font-size:13.5px;line-height:2;padding-left:18px"><li>Actual falla en integración, distancia, flujo, flexibilidad y seguridad.</li><li>Espacio cúbico solo <b>parcial</b> (⚠).</li><li>El propuesto eleva todos los principios.</li></ul></div>
+ </div>
+</section>
+
+<section class="slide" id="s14"><span class="kicker">KaTeX · Distancia</span><h2 class="sec">📐 Medir el recorrido</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Distancia total recorrida</h3>
+   $$D_{total}=\sum_{i}\, d_i \cdot n_i$$
+   <p style="font-size:13.5px;margin-top:8px">donde \(d_i\) = distancia del tramo y \(n_i\) = frecuencia de movimientos. Minimizarla = principio de <b>mínima distancia</b>.</p></div>
+  <div class="card flash"><b class="neon-m">Ejemplo:</b> si A→B recorre 30 m con 40 movimientos/mes y B→C 10 m con 40, ¿\(D_{total}\)?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">\(30\cdot40 + 10\cdot40 = 1600\) m‑mov/mes. Acercar A y B reduce drásticamente.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s15"><span class="kicker">Three.js · 3D</span><h2 class="sec">🧊 Planta 3D: actual vs. propuesta</h2>
+ <p class="sub">Alterna entre distribuciones y observa la reorganización de A→B→C→D:</p>
+ <div class="btnrow">
+  <button class="btn sm active-opt" id="m3B0" onclick="setLayout3(0)">ACTUAL</button>
+  <button class="btn sm gr" id="m3B1" onclick="setLayout3(1)">PROPUESTA</button>
+ </div>
+ <canvas id="threeCanvas" class="view" style="height:320px"></canvas>
+ <div class="card" id="threeDesc" style="margin-top:12px"><b class="neon-c">Escena 3D:</b> cajas = áreas A (almacén), B (ensamblaje), C (calidad), D (empaque). La propuesta alinea el flujo.</div>
+</section>
+
+<section class="slide" id="s16"><span class="kicker">Repaso · respuestas ocultas</span><h2 class="sec">🎯 Tarjetas de repaso</h2>
+ <div class="grid g2">
+  <div class="card flash"><b class="neon-c">1.</b> ¿Qué es la distribución de planta?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Integración de maquinaria, materiales, RR.HH. y servicios en una unidad operativa económica y segura.</div></div>
+  <div class="card flash"><b class="neon-m">2.</b> ¿Qué busca el principio de integración de conjunto?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Coordinar hombres, materiales y maquinaria como unidad cohesionada, minimizando esperas y transporte.</div></div>
+  <div class="card flash"><b class="neon-y">3.</b> ¿Qué aprovecha el espacio cúbico?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">La superficie horizontal y la altura total de las instalaciones.</div></div>
+  <div class="card flash"><b class="neon-g">4.</b> ¿Por qué importa la flexibilidad?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Permite reconfiguración rápida y de bajo costo ante cambios de demanda, tecnología o producto.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s17"><div style="min-height:80%;display:flex;flex-direction:column;justify-content:center">
+ <span class="kicker">Cierre</span><h2 class="sec">🏁 Conclusiones</h2>
+ <div class="grid g4" style="margin:16px 0">
+  <div class="card"><b class="neon-c">Integra</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Humanos, máquinas y materiales = eficiencia y seguridad.</p></div>
+  <div class="card"><b class="neon-m">Niebel</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Interdependencia diseño del trabajo ↔ configuración espacial.</p></div>
+  <div class="card"><b class="neon-g">Minimiza</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Distancias, flujos y espacio cúbico reducen costes.</p></div>
+  <div class="card"><b class="neon-y">Impacta</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Moral, productividad y adaptabilidad futura.</p></div>
+ </div>
+ <div class="card"><h3 class="neon-g">📚 Referencias</h3><p style="font-size:13px;line-height:1.9;color:#bfe9f5">Niebel, B. (2014). Ingeniería industrial: métodos, estándares y diseño del trabajo (13a ed.). McGraw‑Hill.</p></div>
+ <div class="aviso" style="margin-top:26px">📢 ESTÉN ATENTOS AL INICIO DE LA EVALUACIÓN EN CLASE</div>
+ <p class="center" style="margin-top:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow));-webkit-background-clip:text;background-clip:text;color:transparent">¡MUCHAS GRACIAS! ⚙✨</p>
+</div></section>
+</div>
+
+<footer>
+ <button class="btn sm" onclick="goTo(current-1)">◀ Anterior</button>
+ <input type="range" id="slideSlider" min="0" max="17" value="0" oninput="goTo(+this.value)">
+ <button class="btn sm" onclick="goTo(current+1)">Siguiente ▶</button>
+ <span id="slideCounter">1 / 18</span>
+</footer>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];let current=0;
+const slider=document.getElementById('slideSlider');slider.max=slides.length-1;
+function goTo(i){if(i<0||i>=slides.length)return;slides[current].classList.remove('active');current=i;slides[current].classList.add('active');slides[current].scrollTop=0;slider.value=i;document.getElementById('slideCounter').textContent=(i+1)+' / '+slides.length;document.getElementById('progress').style.width=(i/(slides.length-1)*100)+'%';onSlideEnter(i);}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'&&e.target.type!=='range')return;if(e.key==='ArrowRight')goTo(current+1);if(e.key==='ArrowLeft')goTo(current-1);});
+function makeBtns(id,infoId,data){const c=document.getElementById(id);data.forEach((d,i)=>{const b=document.createElement('button');b.className='btn sm'+(i%2?' mg':'');b.textContent=d[0];b.onclick=()=>{c.querySelectorAll('.btn').forEach(x=>x.classList.remove('active-opt'));b.classList.add('active-opt');document.getElementById(infoId).innerHTML='<b class="neon-c">'+d[0]+'</b><p style="margin-top:6px;font-size:14px;color:#d9f3fb">'+d[1]+'</p>';};c.appendChild(b);});}
+makeBtns('impBtns','impInfo',[['Tiempo de ciclo','Un layout mal organizado alarga recorridos y esperas → mayor tiempo de ciclo.'],['Movimiento de materiales','Cada metro recorrido cuesta; optimizar el layout reduce manejo.'],['Salud y motivación','Ergonomía, iluminación y orden mejoran bienestar y productividad.']]);
+makeBtns('priBtns','priInfo',[['1 · Integración de conjunto','Coordinar hombres, materiales y maquinaria como unidad cohesionada; minimiza esperas y transporte.'],['2 · Mínima distancia recorrida','Minimizar el trayecto del material entre operaciones; reduce costes, ciclo y fatiga.'],['3 · Flujo óptimo','Secuencias lógicas (línea, U, L) sin retrocesos ni cruces.'],['4 · Espacio cúbico','Usar superficie horizontal + altura total; economía de espacio.'],['5 · Flexibilidad','Reconfiguración rápida y de bajo costo ante cambios.'],['6 · Seguridad y bienestar','Ergonomía, iluminación, ventilación y reducción de riesgos.']]);
+makeBtns('evBtns','evInfo',[['Integración','❌ Almacén alejado del ensamblaje; varios movimientos intermedios; calidad en zona de paso.'],['Mínima distancia','❌ Movimientos largos almacén→ensamblaje y recorridos indirectos a empaque.'],['Flujo óptimo','❌ Material sube/baja, cruces de transporte y cuellos de botella en calidad.'],['Espacio cúbico','⚠ Parcial: zonas vacías, almacén solo horizontal, sin estanterías altas.'],['Flexibilidad','❌ Equipos fijos, pasillos estrechos, poca reconfiguración.'],['Seguridad','❌ Cruces, congestión y riesgo de accidentes.']]);
+/* ====== SVG: máquinas (Ejemplo 1) ====== */
+function machSVG(){const p=[[60,50,'M1'],[150,50,'M2'],[240,50,'M3'],[60,140,'M4'],[150,140,'M5'],[240,140,'M6']];
+ return p.map(m=>'<rect x="'+(m[0]-22)+'" y="'+(m[1]-15)+'" width="44" height="30" rx="6" fill="rgba(8,10,16,.92)" stroke="#8fb8c6" stroke-width="1.5"/><text x="'+m[0]+'" y="'+(m[1]+4)+'" fill="#eaf6ff" font-size="12" font-weight="700" text-anchor="middle">'+m[2]+'</text>').join('');}
+/* ====== SVG: flujo actual ElectroAndes ====== */
+function areaRect(x,y,l,s,col){return '<rect x="'+(x-62)+'" y="'+(y-22)+'" width="124" height="44" rx="8" fill="rgba(8,10,16,.92)" stroke="'+col+'" stroke-width="2"/><text x="'+x+'" y="'+(y-2)+'" fill="#eaf6ff" font-size="13" font-weight="800" text-anchor="middle">'+l+'</text><text x="'+x+'" y="'+(y+14)+'" fill="#8fb8c6" font-size="9" text-anchor="middle">'+s+'</text>';}
+function flowActualSVG(){return '<svg viewBox="0 0 700 340" style="width:100%;max-width:760px;height:auto">'
+ +'<defs><marker id="mO" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#ff9500"/></marker></defs>'
+ +'<line x1="130" y1="92" x2="500" y2="228" stroke="#ff9500" stroke-width="2.5" marker-end="url(#mO)"/>'
+ +'<line x1="520" y1="228" x2="370" y2="92" stroke="#ff9500" stroke-width="2.5" marker-end="url(#mO)"/>'
+ +'<line x1="300" y1="92" x2="160" y2="228" stroke="#ff9500" stroke-width="2.5" marker-end="url(#mO)"/>'
+ +'<text x="255" y="150" fill="#ff3355" font-size="20" font-weight="800" text-anchor="middle">✗</text>'
+ +'<text x="430" y="150" fill="#ff3355" font-size="20" font-weight="800" text-anchor="middle">✗</text>'
+ +areaRect(70,70,'A','Almacén MP','#00f0ff')+areaRect(330,70,'C','Control Calidad (paso)','#ffe600')+areaRect(560,250,'B','Ensamblaje','#ff2ec4')+areaRect(120,250,'D','Empaque/Despacho','#39ff14')
+ +'<text x="350" y="325" fill="#ffb3a1" font-size="12" text-anchor="middle">Recorridos largos · cruces (✗) · congestión en C</text></svg>';}
+/* ====== SVG: flujo propuesto ====== */
+function flowPropSVG(){return '<svg viewBox="0 0 700 200" style="width:100%;max-width:760px;height:auto">'
+ +'<defs><marker id="mG" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#39ff14"/></marker></defs>'
+ +'<line x1="152" y1="100" x2="205" y2="100" stroke="#39ff14" stroke-width="3" marker-end="url(#mG)"/>'
+ +'<line x1="332" y1="100" x2="385" y2="100" stroke="#39ff14" stroke-width="3" marker-end="url(#mG)"/>'
+ +'<line x1="512" y1="100" x2="565" y2="100" stroke="#39ff14" stroke-width="3" marker-end="url(#mG)"/>'
+ +'<text x="178" y="88" fill="#c9ffd9" font-size="11" text-anchor="middle">10 m</text><text x="358" y="88" fill="#c9ffd9" font-size="11" text-anchor="middle">10 m</text><text x="538" y="88" fill="#c9ffd9" font-size="11" text-anchor="middle">10 m</text>'
+ +areaRect(90,100,'A','Almacén MP','#00f0ff')+areaRect(270,100,'B','Ensamblaje','#ff2ec4')+areaRect(450,100,'C','Control Calidad','#ffe600')+areaRect(630,100,'D','Empaque/Despacho','#39ff14')
+ +'<text x="350" y="180" fill="#c9ffd9" font-size="12" text-anchor="middle">Flujo alineado A→B→C→D · sin cruces ✔</text></svg>';}
+/* ====== Ejemplo 1: layouts con líneas de flujo ====== */
+function laySVG(marker,color,lines,extra){return '<svg viewBox="0 0 300 200" style="width:100%;max-width:360px;height:auto">'
+ +'<defs><marker id="'+marker+'" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="'+color+'"/></marker></defs>'
+ +'<g stroke="'+color+'" stroke-width="2" fill="none">'+lines.map(L=>'<line x1="'+L[0]+'" y1="'+L[1]+'" x2="'+L[2]+'" y2="'+L[3]+'" marker-end="url(#'+marker+')"'+(L[4]?' stroke-dasharray="5,4"':'')+'/>').join('')+'</g>'
+ +(extra||'')+machSVG()+'</svg>';}
+const lays=[
+ '<div class="card center">'+laySVG('mA','#ff9500',[[60,50,150,140],[150,140,150,50],[150,50,240,140],[240,140,240,50],[240,50,60,140]])+'<p style="font-size:13px;margin-top:10px;color:#ffb3a1"><b>Desordenado:</b> el recorrido salta y se <b>cruza</b> (líneas naranjas).</p></div>',
+ '<div class="card center">'+laySVG('mB','#ffe600',[[60,50,150,50],[150,50,150,140],[150,140,60,140],[60,140,240,140],[240,140,240,50]],[[150,140,150,50,1]])+'<p style="font-size:13px;margin-top:10px;color:#f2ecc0"><b>Mejora, pero</b> aún <b>retrocede</b> sobre tramos ya recorridos (línea punteada).</p></div>',
+ '<div class="card center">'+laySVG('mC','#39ff14',[[60,50,150,50],[150,50,240,50],[240,50,240,140],[240,140,150,140],[150,140,60,140]])+'<p style="font-size:13px;margin-top:10px;color:#c9ffd9"><b>Flujo lineal</b> (serpentina) sin cruces: mínima distancia ✔.</p></div>'];
+function showLay(i){[0,1,2].forEach(j=>document.getElementById('layB'+j).classList.toggle('active-opt',j===i));document.getElementById('layPanel').innerHTML=lays[i];}
+showLay(0);
+/* Inserta imágenes de flujo */
+document.getElementById('miniFlow').innerHTML=flowActualSVG();
+document.getElementById('bigFlow').innerHTML=flowActualSVG();
+document.getElementById('propFlow').innerHTML=flowPropSVG();
+/* Chart principios */
+let cP=null;
+function initChartPrin(){if(!window.Chart||cP)return;cP=new Chart(document.getElementById('chartPrin'),{type:'bar',data:{labels:['Integración','Mín. distancia','Flujo','Espacio cúbico','Flexibilidad','Seguridad'],datasets:[{label:'Actual',data:[3,2,2,5,2,3],backgroundColor:'rgba(255,149,0,.7)',borderColor:'#ff9500',borderWidth:2,borderRadius:8},{label:'Propuesto',data:[9,8,9,8,8,9],backgroundColor:'rgba(57,255,20,.7)',borderColor:'#39ff14',borderWidth:2,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#d9f3fb'}}},scales:{x:{ticks:{color:'#9fd8e8'},grid:{color:'rgba(255,255,255,.06)'}},y:{beginAtZero:true,max:10,ticks:{color:'#9fd8e8'},grid:{color:'rgba(255,255,255,.08)'}}}}});}
+/* Three.js planta */
+let threeReady=false,layoutMode=0,boxes3=[],linesG=null,threeGroup=null,threeRenderer,threeScene,threeCam;
+const areas3=[{col:0x00f0ff},{col:0xff2ec4},{col:0xffe600},{col:0x39ff14}];
+const posCur=[[-3,0,-2],[3,0,2],[0,0,0],[-3,0,2]];
+const posProp=[[-3,0,0],[-1,0,0],[1,0,0],[3,0,0]];
+function setLayout3(i){layoutMode=i;[0,1].forEach(j=>document.getElementById('m3B'+j).classList.toggle('active-opt',j===i));document.getElementById('threeDesc').innerHTML=i===0?'<b class="neon-o">ACTUAL:</b> áreas dispersas, cruces y congestión.':'<b class="neon-g">PROPUESTA:</b> flujo alineado A→B→C→D.';}
+function initThree(){if(threeReady)return;if(!window.THREE)return;
+ try{const cv=document.getElementById('threeCanvas');const r=cv.getBoundingClientRect();const w=r.width||800,h=r.height||320;
+ threeRenderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});threeRenderer.setClearColor(0x000000,0);threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));threeRenderer.setSize(w,h,false);
+ threeScene=new THREE.Scene();threeCam=new THREE.PerspectiveCamera(50,w/h,.1,100);threeCam.position.set(0,5,8);threeCam.lookAt(0,0,0);
+ threeScene.add(new THREE.AmbientLight(0xffffff,.85));const p1=new THREE.PointLight(0x66ccff,1.2,80);p1.position.set(8,8,8);threeScene.add(p1);
+ const grid=new THREE.GridHelper(14,14,0x1b6fb0,0x0e3a66);grid.position.y=-0.6;threeScene.add(grid);
+ threeGroup=new THREE.Group();threeScene.add(threeGroup);
+ areas3.forEach((a,i)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.8,1.2),new THREE.MeshPhongMaterial({color:a.col,emissive:a.col,emissiveIntensity:.35,shininess:90}));m.position.set(posCur[i][0],0,posCur[i][2]);threeGroup.add(m);boxes3.push(m);});
+ linesG=new THREE.Group();threeScene.add(linesG);
+ let drag=false,px=0,py=0;
+ cv.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;});
+ cv.addEventListener('pointermove',e=>{if(!drag)return;threeGroup.rotation.y+=(e.clientX-px)*.008;px=e.clientX;py=e.clientY;});
+ ['pointerup','pointerleave'].forEach(ev=>cv.addEventListener(ev,()=>drag=false));
+ (function anim(){requestAnimationFrame(anim);
+  const tgt=layoutMode===0?posCur:posProp;
+  boxes3.forEach((m,i)=>{m.position.x+=(tgt[i][0]-m.position.x)*.06;m.position.z+=(tgt[i][2]-m.position.z)*.06;m.rotation.y+=.005;});
+  while(linesG.children.length)linesG.remove(linesG.children[0]);
+  for(let i=0;i<3;i++){const a=boxes3[i].position,b=boxes3[i+1].position;const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a.x,0.6,a.z),new THREE.Vector3(b.x,0.6,b.z)]);linesG.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0xffe600})));}
+  threeRenderer.render(threeScene,threeCam);})();
+ threeReady=true;}catch(e){}}
+function onSlideEnter(i){const id=slides[i].id;if(id==='s13')setTimeout(initChartPrin,120);if(id==='s15')setTimeout(initThree,120);}
+addEventListener('resize',()=>{if(slides[current].id==='s15'&&threeRenderer){const r=document.getElementById('threeCanvas').getBoundingClientRect();threeRenderer.setSize(r.width,r.height,false);threeCam.aspect=r.width/r.height;threeCam.updateProjectionMatrix();}});
+goTo(0);
+</script>
+</body>
+</html>
