@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingeniería de Métodos II — Sesión 2: Localización de Planta (Teoría)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>if(!window.THREE){document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>');}</script>
+<style>
+:root{--bg:#04040a;--cyan:#00f0ff;--magenta:#ff2ec4;--yellow:#ffe600;--green:#39ff14;--orange:#ff9500;--purple:#a855f7;--usil:#0b5cab;--card:rgba(255,255,255,.05);--border:rgba(0,240,255,.25)}
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%}
+body{background:var(--bg);color:#eaf6ff;font-family:'Segoe UI',system-ui,Arial,sans-serif;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(1100px 600px at 82% -10%,rgba(0,240,255,.13),transparent 60%),radial-gradient(900px 520px at 8% 110%,rgba(255,46,196,.11),transparent 60%),radial-gradient(700px 420px at 50% 55%,rgba(168,85,247,.08),transparent 60%);animation:hue 14s ease-in-out infinite alternate}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;background-image:radial-gradient(1.5px 1.5px at 25% 35%,rgba(0,240,255,.8) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 75% 65%,rgba(255,46,196,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 50% 20%,rgba(255,230,0,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 12% 78%,rgba(57,255,20,.7) 50%,transparent 51%);background-size:340px 340px,420px 420px,260px 260px,380px 380px;animation:drift 90s linear infinite}
+@keyframes hue{to{filter:hue-rotate(40deg)}}@keyframes drift{to{background-position:340px 680px,-420px 840px,260px -520px,-380px 760px}}
+header{position:fixed;top:0;left:0;right:0;height:64px;z-index:50;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(5,6,16,.93);border-bottom:1px solid var(--border)}
+#logoWrap{background:#fff;border-radius:10px;padding:3px 10px;display:flex;align-items:center;flex-shrink:0}#logoWrap img{height:42px;display:block}
+.brand{font-weight:800;font-size:15px;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.head-info{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;font-size:12px}
+.chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);color:var(--cyan);background:rgba(0,240,255,.06);font-weight:600}
+.chip.doc{border-color:rgba(255,46,196,.45);color:var(--magenta);background:rgba(255,46,196,.07)}
+#progress{position:fixed;top:64px;left:0;height:3px;width:0;z-index:60;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow));box-shadow:0 0 14px var(--cyan);transition:width .45s}
+#stage{position:fixed;inset:64px 0 78px 0;z-index:10}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .55s;overflow-y:auto;padding:28px 5vw 60px}
+.slide.active{opacity:1;pointer-events:auto}
+h1.big{font-size:clamp(28px,4.8vw,58px);line-height:1.05;font-weight:900;background:linear-gradient(90deg,var(--cyan) 10%,var(--magenta) 55%,var(--yellow) 95%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(0,240,255,.35))}
+h2.sec{font-size:clamp(22px,3.2vw,34px);font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#9fd8e8;font-size:15px;margin-bottom:18px;max-width:920px;line-height:1.5}
+.kicker{display:inline-block;font-size:12px;letter-spacing:3px;color:var(--yellow);border:1px solid rgba(255,230,0,.4);padding:5px 14px;border-radius:20px;margin-bottom:14px;background:rgba(255,230,0,.06);text-transform:uppercase;font-weight:700}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;backdrop-filter:blur(6px)}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.neon-c{color:var(--cyan)}.neon-m{color:var(--magenta)}.neon-y{color:var(--yellow)}.neon-g{color:var(--green)}.neon-o{color:var(--orange)}.neon-p{color:var(--purple)}
+.tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:14px;margin:3px 4px 3px 0;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05)}
+.btn{cursor:pointer;border:1px solid var(--cyan);color:var(--cyan);background:rgba(0,240,255,.07);padding:10px 22px;border-radius:10px;font-size:15px;font-weight:700;text-transform:uppercase;transition:.25s;text-decoration:none;display:inline-block}
+.btn:hover{background:rgba(0,240,255,.2);box-shadow:0 0 18px rgba(0,240,255,.5);transform:translateY(-2px)}
+.btn.mg{border-color:var(--magenta);color:var(--magenta);background:rgba(255,46,196,.07)}.btn.yl{border-color:var(--yellow);color:var(--yellow);background:rgba(255,230,0,.07)}.btn.gr{border-color:var(--green);color:var(--green);background:rgba(57,255,20,.07)}
+.btn.sm{padding:6px 14px;font-size:12.5px}.btn.active-opt{background:rgba(0,240,255,.28);box-shadow:0 0 16px rgba(0,240,255,.55)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--magenta));outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--yellow);border:2px solid #000;box-shadow:0 0 12px var(--yellow);cursor:pointer}
+footer{position:fixed;bottom:0;left:0;right:0;height:78px;z-index:50;display:flex;align-items:center;gap:16px;padding:0 22px;background:rgba(5,6,16,.93);border-top:1px solid var(--border)}
+#slideSlider{flex:1}#slideCounter{font-size:13px;color:#9fd8e8;min-width:64px;text-align:center;font-weight:700}
+.stat{font-size:26px;font-weight:900}.stat-lbl{font-size:11.5px;letter-spacing:1.5px;color:#8fb8c6;text-transform:uppercase}
+.tl-item{cursor:pointer;transition:.25s}.tl-item:hover{transform:translateY(-3px);box-shadow:0 0 20px rgba(0,240,255,.25)}
+canvas.view{width:100%;border:1px solid var(--border);border-radius:14px;background:rgba(0,0,10,.5)}
+.center{text-align:center}
+.note{border-left:4px solid var(--yellow);background:rgba(255,230,0,.06);padding:10px 14px;border-radius:0 10px 10px 0;font-size:13.5px;color:#f2ecc0;margin-top:12px}
+.katex{color:#fff}
+.flash .ans{display:none;margin-top:10px;border-left:3px solid var(--green);padding:8px 12px;background:rgba(57,255,20,.08);color:#c9ffd9;font-size:13.5px}
+.flash.open .ans{display:block}
+.aviso{border:2px dashed var(--magenta);background:rgba(255,46,196,.08);border-radius:14px;padding:18px;font-size:17px;font-weight:800;color:var(--magenta);text-align:center;box-shadow:0 0 24px rgba(255,46,196,.25)}
+</style>
+</head>
+<body>
+<header>
+ <div id="logoWrap"><img src="USIL_logo.png" alt="USIL 30 años" onerror="this.onerror=null;this.style.display='none';document.getElementById('logoFallback').style.display='block';">
+  <svg id="logoFallback" viewBox="0 0 250 90" height="42" style="display:none"><text x="2" y="64" font-size="54" font-weight="700" fill="none" stroke="#c9a24b" stroke-width="2.5" font-family="Georgia,serif">30</text><circle cx="88" cy="36" r="24" fill="none" stroke="#c9a24b" stroke-width="3"/><text x="88" y="42" font-size="14" fill="#c9a24b" text-anchor="middle" font-family="Georgia,serif">años</text><text x="118" y="68" font-size="56" font-weight="800" fill="#0b5cab" font-family="Georgia,serif" font-style="italic">USIL</text></svg></div>
+ <div class="brand">⚙ INGENIERÍA DE MÉTODOS II · TEORÍA</div>
+ <div class="head-info"><span class="chip">Sesión 2 · Localización de Planta</span><span class="chip doc">👷 Eduardo Olivos</span></div>
+</header>
+<div id="progress"></div>
+<div id="stage">
+
+<section class="slide active" id="s0"><div style="min-height:82%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+ <span class="kicker">Sesión 02 · 2026-II</span>
+ <h1 class="big">LOCALIZACIÓN DE PLANTA</h1>
+ <p class="sub center" style="margin-top:14px">Métodos <b class="neon-c">cualitativos y cuantitativos</b> para evaluar alternativas de ubicación y elegir la opción <b class="neon-m">técnica y económicamente</b> conveniente.</p>
+ <div class="card"><b class="neon-y">Curso:</b> Ingeniería de Métodos II | <b class="neon-y">Docente:</b> Eduardo Olivos</div>
+ <div class="btnrow" style="justify-content:center;margin-top:26px"><button class="btn" onclick="goTo(1)">▶ Iniciar la clase</button></div>
+</div></section>
+
+<section class="slide" id="s1"><span class="kicker">Hoja de ruta</span><h2 class="sec">🗺 Hoja de ruta de la sesión</h2>
+ <p class="sub">Haz clic en cada bloque (avanzamos al ritmo del grupo):</p>
+ <div class="grid g4">
+  <div class="card tl-item" onclick="goTo(2)"><div class="stat neon-c">🎯</div><div class="stat-lbl">Objetivo y caso</div></div>
+  <div class="card tl-item" onclick="goTo(4)"><div class="stat neon-y">🧭</div><div class="stat-lbl">Factores de localización</div></div>
+  <div class="card tl-item" onclick="goTo(6)"><div class="stat neon-m">🌎</div><div class="stat-lbl">Macro y micro</div></div>
+  <div class="card tl-item" onclick="goTo(7)"><div class="stat neon-o">⚖</div><div class="stat-lbl">Ponderación de factores</div></div>
+  <div class="card tl-item" onclick="goTo(8)"><div class="stat neon-g">🎯</div><div class="stat-lbl">Centro de gravedad</div></div>
+  <div class="card tl-item" onclick="goTo(12)"><div class="stat neon-p">📈</div><div class="stat-lbl">Punto de equilibrio</div></div>
+  <div class="card tl-item" onclick="goTo(14)"><div class="stat neon-c">🧊</div><div class="stat-lbl">3D y reflexiones</div></div>
+  <div class="card tl-item" onclick="goTo(17)"><div class="stat neon-m">📢</div><div class="stat-lbl">Cierre</div></div>
+ </div>
+ <div class="note">💡 Esta presentación es <b>interactiva</b>: pulsa botones, mueve deslizadores y responde las tarjetas.</div>
+</section>
+
+<section class="slide" id="s2"><span class="kicker">Momento 1 · Utilidad</span><h2 class="sec">🎯 Logro y pregunta gatillo</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Logro de la sesión</h3><p style="font-size:15px;line-height:1.6;margin-top:6px">Analizar y aplicar diferentes <b>métodos de localización de planta</b> para evaluar alternativas de ubicación y seleccionar la opción más conveniente desde una perspectiva técnica y económica.</p>
+   <h3 class="neon-m" style="margin-top:14px">Reto</h3><p style="font-size:14px;line-height:1.6;margin-top:6px">🏭 <b>Complejo industrial con logística activa:</b> optimizar costes y servicio; decisión estratégica a largo plazo en la cadena de suministro.</p></div>
+  <div class="card"><h3 class="neon-y">Pregunta gatillo</h3><p style="font-size:14px;line-height:1.6;margin-top:6px">Una empresa peruana quiere instalar una nueva planta para exportar a EE.UU. Opciones: <b>Lima, Arequipa o Trujillo</b>. ¿Qué factores debería analizar antes de decidir?</p>
+   <div class="note">🤔 Piensa en mercados, insumos, mano de obra, infraestructura, servicios y marco legal.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s3"><span class="kicker">Innovación · Reflexión</span><h2 class="sec">👁 ¿Y si la ubicación es inadecuada?</h2>
+ <p class="sub">Pulsa cada consecuencia:</p>
+ <div class="btnrow" id="refBtns"></div>
+ <div class="card" id="refInfo" style="min-height:80px"><b class="neon-y">Selecciona una consecuencia</b>.</div>
+ <div class="note">⚠ Una ubicación subóptima genera <b>costes logísticos insostenibles</b>, restringe talento y complica normativas → merma la competitividad a largo plazo.</div>
+</section>
+
+<section class="slide" id="s4"><span class="kicker">Factores críticos</span><h2 class="sec">🧭 Factores de localización</h2>
+ <p class="sub">Pulsa cada factor:</p>
+ <div class="btnrow" id="facBtns"></div>
+ <div class="card" id="facInfo" style="min-height:90px"><b class="neon-y">Selecciona un factor</b>.</div>
+</section>
+
+<section class="slide" id="s5"><span class="kicker">Alcance</span><h2 class="sec">🌎 Macro‑localización vs. Micro‑localización</h2>
+ <div class="btnrow">
+  <button class="btn sm active-opt" id="mmB0" onclick="showMM(0)">MACRO</button>
+  <button class="btn sm mg" id="mmB1" onclick="showMM(1)">MICRO</button>
+  <button class="btn sm yl" id="mmB2" onclick="showMM(2)">ALCANCE INSTALACIONES</button>
+ </div>
+ <div id="mmPanel"></div>
+</section>
+
+<section class="slide" id="s6"><span class="kicker">Métodos</span><h2 class="sec">⚖ Cuantitativos vs. Cualitativos</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Cualitativos</h3><div style="margin-top:8px"><span class="tag">Ponderación de factores</span><span class="tag">Juicio experto</span><span class="tag">Preferencias estratégicas</span></div>
+   <p style="font-size:13.5px;margin-top:10px;color:#bfe9f5">Integran aspectos que no se miden directamente (clima de negocios, riesgos, calidad de vida).</p></div>
+  <div class="card"><h3 class="neon-m">Cuantitativos</h3><div style="margin-top:8px"><span class="tag">Centro de gravedad</span><span class="tag">Punto de equilibrio de localización</span><span class="tag">Costos de transporte</span></div>
+   <p style="font-size:13.5px;margin-top:10px;color:#bfe9f5">Usan datos de demanda, distancia y costo para dar una ubicación objetiva.</p></div>
+ </div>
+</section>
+
+<section class="slide" id="s7"><span class="kicker">Método cualitativo</span><h2 class="sec">⚖ Ponderación de factores (ejemplo)</h2>
+ <p class="sub">Tabla de factores, pesos y calificaciones (0–100). Pulsa cada ciudad para ver su puntaje ponderado:</p>
+ <div class="card" style="overflow-x:auto;margin-bottom:14px">
+  <table style="width:100%;border-collapse:collapse;font-size:13.5px;text-align:center">
+   <tr style="color:var(--yellow)">
+     <th style="text-align:left;padding:8px;border-bottom:1px solid rgba(255,230,0,.35)">FACTOR</th>
+     <th style="padding:8px;border-bottom:1px solid rgba(255,230,0,.35)">PESO</th>
+     <th style="padding:8px;border-bottom:1px solid rgba(255,230,0,.35)">LIMA</th>
+     <th style="padding:8px;border-bottom:1px solid rgba(255,230,0,.35)">AREQUIPA</th>
+     <th style="padding:8px;border-bottom:1px solid rgba(255,230,0,.35)">TRUJILLO</th>
+   </tr>
+   <tr><td style="text-align:left;padding:7px;border-bottom:1px solid rgba(255,255,255,.08)">Proximidad a mercados</td><td>25</td><td>90</td><td>70</td><td>75</td></tr>
+   <tr style="background:rgba(255,255,255,.03)"><td style="text-align:left;padding:7px;border-bottom:1px solid rgba(255,255,255,.08)">Proximidad a materias primas</td><td>20</td><td>70</td><td>90</td><td>80</td></tr>
+   <tr><td style="text-align:left;padding:7px;border-bottom:1px solid rgba(255,255,255,.08)">Mano de obra (MO)</td><td>20</td><td>85</td><td>75</td><td>70</td></tr>
+   <tr style="background:rgba(255,255,255,.03)"><td style="text-align:left;padding:7px;border-bottom:1px solid rgba(255,255,255,.08)">Infraestructura</td><td>20</td><td>95</td><td>70</td><td>75</td></tr>
+   <tr><td style="text-align:left;padding:7px;border-bottom:1px solid rgba(255,255,255,.08)">Gobierno / legal</td><td>15</td><td>80</td><td>85</td><td>75</td></tr>
+   <tr style="font-weight:800"><td style="text-align:left;padding:8px;color:var(--green)">TOTAL PONDERADO</td><td style="color:var(--green)">100</td><td style="color:var(--cyan)">84.5</td><td style="color:var(--magenta)">75.75</td><td style="color:var(--magenta)">75.0</td></tr>
+  </table>
+ </div>
+ <div class="btnrow" id="pondBtns"></div>
+ <div class="card" id="pondInfo" style="min-height:90px"><b class="neon-y">Selecciona una ciudad</b>.</div>
+ <div class="note">✅ Gana el mayor total ponderado. Aquí <b>Lima (84.5)</b> supera a Arequipa (75.75) y Trujillo (75.0).</div>
+</section>
+
+<section class="slide" id="s8"><span class="kicker">Método cuantitativo</span><h2 class="sec">🎯 Centro de gravedad</h2>
+ <div class="card" style="margin-bottom:14px"><p style="font-size:14.5px;line-height:1.6">Técnica que determina la ubicación óptima considerando <b>ubicación de clientes/mercados</b>, <b>volumen de demanda</b> y <b>costos/distancias de transporte</b>. Busca el punto que <b>minimiza el costo total de transporte</b>.</p>
+ <h3 class="neon-y" style="margin-top:10px">Fórmulas</h3>
+ $$X^{*}=\frac{\sum X_i\,W_i}{\sum W_i}\qquad Y^{*}=\frac{\sum Y_i\,W_i}{\sum W_i}$$
+ <p style="font-size:13px;margin-top:6px;color:#bfe9f5">\(W_i\) = demanda (o demanda × costo) de cada punto.</p></div>
+ <div class="note">🧲 El centro se “jala” hacia los puntos con mayor peso.</div>
+</section>
+
+<section class="slide" id="s9"><span class="kicker">Canvas 2D · Interactivo</span><h2 class="sec">🗺 Centro de gravedad en el mapa</h2>
+ <p class="sub">Mueve el deslizador para alternar el <b>Ejemplo 1</b> (peso = demanda) y el <b>Ejemplo 2</b> (peso = demanda × costo). Las líneas punteadas unen cada ciudad con el centro de gravedad:</p>
+ <input type="range" id="cgSlider" min="1" max="2" value="1" step="1" style="width:100%;max-width:500px" oninput="drawCG(+this.value)">
+ <div class="card" id="cgLabel" style="margin:10px 0;min-height:46px"></div>
+ <canvas id="cgCanvas" class="view" style="height:320px"></canvas>
+</section>
+
+<section class="slide" id="s10"><span class="kicker">Ejemplo 1 · Cálculo</span><h2 class="sec">🧮 Centro de gravedad (demanda)</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Datos (ton/mes)</h3><ul style="font-size:14px;line-height:2;padding-left:18px"><li>A(20,30) · 100</li><li>B(50,40) · 200</li><li>C(40,10) · 300</li></ul></div>
+  <div class="card"><h3 class="neon-y">Resultado (pulsa para verificar)</h3>
+   <div class="flash"><b class="neon-c">X* e Y*</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">\(X^{*}=\frac{20(100)+50(200)+40(300)}{600}=\frac{24000}{600}=40\)<br>\(Y^{*}=\frac{30(100)+40(200)+10(300)}{600}=\frac{14000}{600}=23.33\)<br>→ (40, 23.33), cercano a C (mayor demanda).</div></div></div>
+ </div>
+</section>
+
+<section class="slide" id="s11"><span class="kicker">Ejemplo 2 · Cálculo con costo</span><h2 class="sec">🧮 Centro de gravedad (demanda × costo)</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Datos (demanda, $/ton)</h3><ul style="font-size:14px;line-height:2;padding-left:18px"><li>A(10,30) · 100 · $4 → W=400</li><li>B(40,20) · 200 · $3 → W=600</li><li>C(30,50) · 150 · $5 → W=750</li></ul></div>
+  <div class="card"><h3 class="neon-y">Resultado y costo total (pulsa)</h3>
+   <div class="flash"><b class="neon-c">X*, Y* y costo</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">\(X^{*}=\frac{10(400)+40(600)+30(750)}{1750}=28.86\)<br>\(Y^{*}=\frac{30(400)+20(600)+50(750)}{1750}=35.14\)<br>Costo total ≈ 7,818.35 + 11,280.47 + 11,175.78 = <b>$30,274.60</b>.</div></div></div>
+ </div>
+</section>
+
+<section class="slide" id="s12"><span class="kicker">Punto de equilibrio</span><h2 class="sec">📈 Equilibrio de localización</h2>
+ <div class="card" style="margin-bottom:14px"><p style="font-size:14.5px;line-height:1.6">Cada ubicación tiene <b>costos fijos</b> (terreno, alquiler, impuestos) y <b>variables</b> (transporte, MO, servicios) distintos. El <b>punto de equilibrio</b> indica el volumen donde ambas alternativas tienen el mismo costo total.</p>
+ <h3 class="neon-y" style="margin-top:10px">Ejemplo (Ciudad A vs B)</h3>
+ $$100{,}000+8Q=200{,}000+5Q\ \Rightarrow\ 3Q=100{,}000\ \Rightarrow\ Q\approx33{,}333$$
+ <p style="font-size:13px;margin-top:6px;color:#bfe9f5">&lt;33,333 → conviene A (menor fijo). &gt;33,333 → conviene B (menor variable).</p></div>
+ <div class="note">📊 Mueve el deslizador en la siguiente lámina y observa el cambio.</div>
+</section>
+
+<section class="slide" id="s13"><span class="kicker">Chart.js · Interactivo</span><h2 class="sec">📊 Costo total vs. volumen</h2>
+ <p class="sub">Mueve el <b>volumen Q</b> y mira qué ciudad conviene:</p>
+ <input type="range" id="beSlider" min="0" max="60000" value="20000" step="1000" style="width:100%;max-width:700px" oninput="drawBE(+this.value)">
+ <div class="card" id="beLabel" style="margin:10px 0;min-height:46px"></div>
+ <div class="card"><canvas id="beChart" style="height:280px"></canvas></div>
+</section>
+
+<section class="slide" id="s14"><span class="kicker">Reflexiones</span><h2 class="sec">🤔 Costo vs. estrategia y digitalización</h2>
+ <div class="grid g2">
+  <div class="card flash"><b class="neon-c">¿Por qué la más barata no siempre es la mejor?</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">En empresas de alta tecnología pesan la <b>proximidad a centros de innovación</b> y la <b>disponibilidad de talento especializado</b>, más que el costo operativo.</div></div>
+  <div class="card flash"><b class="neon-m">¿Cómo cambia la digitalización los pesos?</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Con teletrabajo y conectividad, la <b>proximidad a MO calificada</b> y la <b>infraestructura de transporte</b> pierden peso relativo frente a conectividad digital y costos de operación remota.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s15"><span class="kicker">Three.js · 3D</span><h2 class="sec">🧊 Ciudades y centro de gravedad</h2>
+ <p class="sub">Columnas = demanda de cada ciudad; esfera = centro de gravedad. Pulsa para enfocar:</p>
+ <div class="btnrow">
+  <button class="btn sm" onclick="focus3D(0)">Ciudad A</button>
+  <button class="btn sm mg" onclick="focus3D(1)">Ciudad B</button>
+  <button class="btn sm yl" onclick="focus3D(2)">Ciudad C</button>
+  <button class="btn sm gr" onclick="focus3D(3)">Centro de gravedad</button>
+ </div>
+ <canvas id="threeCanvas" class="view" style="height:300px"></canvas>
+ <div class="card" id="threeDesc" style="margin-top:12px"><b class="neon-c">Escena 3D:</b> el centro se ubica “jalado” por las demandas.</div>
+</section>
+
+<section class="slide" id="s16"><span class="kicker">Actividad</span><h2 class="sec">✍ Actividad grupal</h2>
+ <div class="card"><p style="font-size:15px;line-height:1.7">En grupo, desarrollen en el <b>Canvas (semana 2)</b> la <b>selección de ubicación</b> y el <b>análisis de producción</b> aplicando ponderación de factores, centro de gravedad y punto de equilibrio.</p></div>
+ <div class="card flash" style="margin-top:14px"><b class="neon-y">🤔 ¿Qué método usarías para un centro de distribución y cuál para una planta de alta tecnología?</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">CD: <b>centro de gravedad</b> (minimiza transporte). Planta alta tecnología: <b>ponderación de factores</b> (talento, innovación, normativa) + análisis estratégico.</div></div>
+</section>
+
+<section class="slide" id="s17"><span class="kicker">Repaso · respuestas ocultas</span><h2 class="sec">🎯 Tarjetas de repaso</h2>
+ <div class="grid g2">
+  <div class="card flash"><b class="neon-c">1.</b> ¿Qué evalúa la macro‑localización?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">País/región amplia según PIB, estabilidad política, infraestructura y mano de obra.</div></div>
+  <div class="card flash"><b class="neon-m">2.</b> ¿Qué evalúa la micro‑localización?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Terreno específico: costo del suelo, topografía, accesibilidad, servicios y restricciones.</div></div>
+  <div class="card flash"><b class="neon-y">3.</b> ¿Qué minimiza el centro de gravedad?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">El costo total de transporte ponderado por demanda (y costo).</div></div>
+  <div class="card flash"><b class="neon-g">4.</b> ¿Qué indica el punto de equilibrio de localización?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">El volumen donde dos ubicaciones tienen igual costo total; define cuál conviene según el volumen.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s18"><div style="min-height:80%;display:flex;flex-direction:column;justify-content:center">
+ <span class="kicker">Cierre</span><h2 class="sec">🏁 Conclusiones</h2>
+ <div class="grid g4" style="margin:16px 0">
+  <div class="card"><b class="neon-c">Integrar</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Criterios cualitativos y cuantitativos.</p></div>
+  <div class="card"><b class="neon-m">Mala ubicación</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Genera costes logísticos ocultos.</p></div>
+  <div class="card"><b class="neon-g">Reevaluar</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Cambios tecnológicos y normativos exigen revisión periódica.</p></div>
+  <div class="card"><b class="neon-y">Modelos</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Base objetiva; no sustituyen el juicio experto.</p></div>
+ </div>
+ <div class="card"><h3 class="neon-y">📚 Referencias</h3><p style="font-size:13px;line-height:1.9;color:#bfe9f5">Niebel, B. (2014). Ingeniería industrial: métodos, estándares y diseño del trabajo (13a ed.). McGraw‑Hill.</p></div>
+ <div class="aviso" style="margin-top:26px">📢 ESTÉN ATENTOS AL INICIO DE LA EVALUACIÓN EN CLASE</div>
+ <p class="center" style="margin-top:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow));-webkit-background-clip:text;background-clip:text;color:transparent">¡MUCHAS GRACIAS! ⚙✨</p>
+</div></section>
+</div>
+
+<footer>
+ <button class="btn sm" onclick="goTo(current-1)">◀ Anterior</button>
+ <input type="range" id="slideSlider" min="0" max="18" value="0" oninput="goTo(+this.value)">
+ <button class="btn sm" onclick="goTo(current+1)">Siguiente ▶</button>
+ <span id="slideCounter">1 / 19</span>
+</footer>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];let current=0;
+const slider=document.getElementById('slideSlider');slider.max=slides.length-1;
+function goTo(i){if(i<0||i>=slides.length)return;slides[current].classList.remove('active');current=i;slides[current].classList.add('active');slides[current].scrollTop=0;slider.value=i;document.getElementById('slideCounter').textContent=(i+1)+' / '+slides.length;document.getElementById('progress').style.width=(i/(slides.length-1)*100)+'%';onSlideEnter(i);}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'&&e.target.type!=='range')return;if(e.key==='ArrowRight')goTo(current+1);if(e.key==='ArrowLeft')goTo(current-1);});
+function makeBtns(id,infoId,data){const c=document.getElementById(id);data.forEach((d,i)=>{const b=document.createElement('button');b.className='btn sm'+(i%2?' mg':'');b.textContent=d[0];b.onclick=()=>{c.querySelectorAll('.btn').forEach(x=>x.classList.remove('active-opt'));b.classList.add('active-opt');document.getElementById(infoId).innerHTML='<b class="neon-c">'+d[0]+'</b><p style="margin-top:6px;font-size:14px;color:#d9f3fb">'+d[1]+'</p>';};c.appendChild(b);});}
+makeBtns('refBtns','refInfo',[['Costes logísticos','Ubicación subóptima → transporte caro e insostenible.'],['Talento','Restringe el acceso a mano de obra cualificada.'],['Normativas','Complica el cumplimiento de regulaciones locales.'],['Competitividad','Merma la competitividad a largo plazo.']]);
+makeBtns('facBtns','facInfo',[['Proximidad a mercados','Reduce tiempos y costes de distribución.'],['Proximidad a materias primas','Crítico para insumos voluminosos o perecederos.'],['Mano de obra','Disponibilidad y coste de mano de obra cualificada.'],['Infraestructura de transporte','Acceso a carreteras, puertos y aeropuertos.'],['Servicios y energía','Electricidad, agua y gestión de residuos.'],['Gobierno y legal','Impuestos, incentivos y normativas locales.']]);
+const mm=['<div class="card"><h3 class="neon-c">MACRO‑LOCALIZACIÓN</h3><ul style="font-size:14px;line-height:2;padding-left:18px"><li>Selección de <b>país o región amplia</b>.</li><li>Indicadores: PIB, estabilidad política, infraestructura, mano de obra.</li><li>Primera fase; define el entorno general de inversión.</li></ul></div>','<div class="card"><h3 class="neon-m">MICRO‑LOCALIZACIÓN</h3><ul style="font-size:14px;line-height:2;padding-left:18px"><li>Elección del <b>terreno específico</b> dentro de la región.</li><li>Costo del suelo, topografía, accesibilidad, servicios municipales, restricciones.</li><li>Refina la decisión y asegura idoneidad del sitio.</li></ul></div>','<div class="card"><h3 class="neon-y">ALCANCE DE LAS INSTALACIONES</h3><p style="font-size:14px;line-height:1.8">Evaluación del campus/criterios de accesibilidad y costos; delimita el alcance físico de la operación.</p></div>'];
+function showMM(i){[0,1,2].forEach(j=>document.getElementById('mmB'+j).classList.toggle('active-opt',j===i));document.getElementById('mmPanel').innerHTML=mm[i];}
+showMM(0);
+const pond=[['Lima','25(90)+20(70)+20(85)+20(95)+15(80) = 22.5+14+17+19+12 = <b>84.5</b>'],['Arequipa','25(70)+20(90)+20(75)+20(70)+15(85) = 17.5+18+15+14+12.75 = <b>75.75</b>'],['Trujillo','25(75)+20(80)+20(70)+20(75)+15(75) = 18.75+16+14+15+11.25 = <b>75.0</b>']];
+makeBtns('pondBtns','pondInfo',pond);
+/* Canvas centro de gravedad CON LÍNEAS AL CENTRO */
+const cgData={1:{pts:[[20,30,100,'A'],[50,40,200,'B'],[40,10,300,'C']],c:[40,23.33],t:'Ejemplo 1 · peso = demanda → Centro (40, 23.33)'},
+ 2:{pts:[[10,30,400,'A'],[40,20,600,'B'],[30,50,750,'C']],c:[28.86,35.14],t:'Ejemplo 2 · peso = demanda × costo → Centro (28.86, 35.14)'}};
+function drawCG(ex){const d=cgData[ex];const cv=document.getElementById('cgCanvas');const dpr=window.devicePixelRatio||1;const W=cv.clientWidth,H=320;cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+ const sx=v=>20+(v/60)*(W-40);const sy=v=>H-20-(v/60)*(H-40);
+ x.strokeStyle='rgba(255,255,255,.12)';x.lineWidth=1;for(let g=0;g<=60;g+=10){x.beginPath();x.moveTo(sx(g),sy(0));x.lineTo(sx(g),sy(60));x.stroke();x.beginPath();x.moveTo(sx(0),sy(g));x.lineTo(sx(60),sy(g));x.stroke();}
+ const maxW=Math.max(...d.pts.map(p=>p[2]));
+ /* Líneas punteadas de cada ciudad al centro de gravedad */
+ d.pts.forEach(p=>{x.save();x.strokeStyle='rgba(57,255,20,.55)';x.lineWidth=2;x.setLineDash([6,5]);x.beginPath();x.moveTo(sx(p[0]),sy(p[1]));x.lineTo(sx(d.c[0]),sy(d.c[1]));x.stroke();x.restore();});
+ /* Burbujas de ciudades */
+ d.pts.forEach(p=>{const r=8+22*(p[2]/maxW);x.save();x.shadowColor='#00f0ff';x.shadowBlur=14;x.fillStyle='rgba(0,240,255,.25)';x.strokeStyle='#00f0ff';x.lineWidth=2;x.beginPath();x.arc(sx(p[0]),sy(p[1]),r,0,Math.PI*2);x.fill();x.stroke();x.restore();
+  x.fillStyle='#eaf6ff';x.font='bold 13px Segoe UI';x.textAlign='center';x.fillText(p[3]+' ('+p[2]+')',sx(p[0]),sy(p[1])-r-6);});
+ /* Centro de gravedad */
+ x.save();x.shadowColor='#39ff14';x.shadowBlur=16;x.strokeStyle='#39ff14';x.lineWidth=3;x.beginPath();x.moveTo(sx(d.c[0])-10,sy(d.c[1])-10);x.lineTo(sx(d.c[0])+10,sy(d.c[1])+10);x.moveTo(sx(d.c[0])+10,sy(d.c[1])-10);x.lineTo(sx(d.c[0])-10,sy(d.c[1])+10);x.stroke();x.restore();
+ document.getElementById('cgLabel').innerHTML='<b class="neon-c">▶</b> '+d.t;}
+/* Chart punto de equilibrio */
+let beChart=null;
+function drawBE(q){const A=100000+8*q,B=200000+5*q;const best=A<=B?'Ciudad A':'Ciudad B';
+ document.getElementById('beLabel').innerHTML='<b class="neon-c">▶</b> Q='+q.toLocaleString()+' → A=$'+(A/1000).toFixed(0)+'k · B=$'+(B/1000).toFixed(0)+'k · Conviene: <b class="neon-g">'+best+'</b>'+(Math.abs(q-33333)<1500?' · <b class="neon-y">PUNTO DE EQUILIBRIO</b>':'');
+ if(!window.Chart)return;
+ const vols=[0,10000,20000,33333,40000,50000,60000];
+ const dA=vols.map(v=>100000+8*v),dB=vols.map(v=>200000+5*v);
+ if(!beChart){beChart=new Chart(document.getElementById('beChart'),{type:'line',data:{labels:vols,datasets:[{label:'Ciudad A',data:dA,borderColor:'#00f0ff',backgroundColor:'rgba(0,240,255,.12)',borderWidth:2,pointRadius:2},{label:'Ciudad B',data:dB,borderColor:'#ff2ec4',backgroundColor:'rgba(255,46,196,.12)',borderWidth:2,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#d9f3fb'}}},scales:{x:{title:{display:true,text:'Volumen Q (unidades/año)',color:'#9fd8e8'},ticks:{color:'#9fd8e8'},grid:{color:'rgba(255,255,255,.06)'}},y:{title:{display:true,text:'Costo total ($)',color:'#9fd8e8'},ticks:{color:'#9fd8e8'},grid:{color:'rgba(255,255,255,.08)'}}}}});}
+ else{beChart.data.datasets[0].data=dA;beChart.data.datasets[1].data=dB;beChart.update('none');}}
+/* Three.js */
+let threeReady=false,threeFocus=-1,threeMeshes=[],threeGroup=null,threeRenderer,threeScene,threeCam;
+const defs3=[{col:0x00f0ff,d:'<b class="neon-c">CIUDAD A:</b> demanda 100 (menor peso).'},{col:0xff2ec4,d:'<b class="neon-m">CIUDAD B:</b> demanda 200.'},{col:0xffe600,d:'<b class="neon-y">CIUDAD C:</b> demanda 300 (jala el centro).'},{col:0x39ff14,d:'<b class="neon-g">CENTRO DE GRAVEDAD:</b> minimiza costo de transporte.'}];
+function initThree(){if(threeReady)return;if(!window.THREE)return;
+ try{const cv=document.getElementById('threeCanvas');const r=cv.getBoundingClientRect();const w=r.width||800,h=r.height||300;
+ threeRenderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});threeRenderer.setClearColor(0x000000,0);threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));threeRenderer.setSize(w,h,false);
+ threeScene=new THREE.Scene();threeCam=new THREE.PerspectiveCamera(50,w/h,.1,100);threeCam.position.set(0,5,10);threeCam.lookAt(0,0.5,0);
+ threeScene.add(new THREE.AmbientLight(0xffffff,.85));const p1=new THREE.PointLight(0x66ccff,1.2,80);p1.position.set(8,8,8);threeScene.add(p1);
+ const grid=new THREE.GridHelper(16,16,0x1b6fb0,0x0e3a66);grid.position.y=-0.2;threeScene.add(grid);
+ threeGroup=new THREE.Group();threeScene.add(threeGroup);
+ const cities=[[-3,0,-2,1],[2,0,1,2],[0,0,-3,3]];
+ cities.forEach((c,i)=>{const hgt=0.8+c[3]*0.7;const m=new THREE.Mesh(new THREE.BoxGeometry(1,hgt,1),new THREE.MeshPhongMaterial({color:defs3[i].col,emissive:defs3[i].col,emissiveIntensity:.35,shininess:90}));m.position.set(c[0],hgt/2,c[2]);threeGroup.add(m);threeMeshes.push(m);});
+ const cg=new THREE.Mesh(new THREE.SphereGeometry(.5,32,32),new THREE.MeshPhongMaterial({color:0x39ff14,emissive:0x39ff14,emissiveIntensity:.7}));cg.position.set(0.3,1.2,0.2);threeGroup.add(cg);threeMeshes.push(cg);
+ let drag=false,px=0,py=0;
+ cv.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;});
+ cv.addEventListener('pointermove',e=>{if(!drag)return;threeGroup.rotation.y+=(e.clientX-px)*.008;px=e.clientX;py=e.clientY;});
+ ['pointerup','pointerleave'].forEach(ev=>cv.addEventListener(ev,()=>drag=false));
+ (function anim(t){requestAnimationFrame(anim);if(!drag)threeGroup.rotation.y+=.0035;
+  threeMeshes.forEach((m,i)=>{const tg=(threeFocus===i)?1.4:((threeFocus===-1)?1:.8);m.scale.lerp(new THREE.Vector3(tg,tg,tg),.08);m.material.emissiveIntensity+=(((threeFocus===i)?.75:.35)-m.material.emissiveIntensity)*.08;});
+  threeRenderer.render(threeScene,threeCam);})();
+ threeReady=true;}catch(e){}}
+function focus3D(i){threeFocus=(threeFocus===i)?-1:i;document.getElementById('threeDesc').innerHTML=threeFocus===-1?'<b class="neon-c">Escena 3D:</b> el centro se ubica “jalado” por las demandas.':defs3[i].d;}
+function onSlideEnter(i){const id=slides[i].id;
+ if(id==='s9')drawCG(+document.getElementById('cgSlider').value);
+ if(id==='s13')drawBE(+document.getElementById('beSlider').value);
+ if(id==='s15')setTimeout(initThree,120);}
+addEventListener('resize',()=>{const id=slides[current].id;if(id==='s9')drawCG(+document.getElementById('cgSlider').value);if(id==='s15'&&threeRenderer){const r=document.getElementById('threeCanvas').getBoundingClientRect();threeRenderer.setSize(r.width,r.height,false);threeCam.aspect=r.width/r.height;threeCam.updateProjectionMatrix();}});
+goTo(0);
+</script>
+</body>
+</html>
