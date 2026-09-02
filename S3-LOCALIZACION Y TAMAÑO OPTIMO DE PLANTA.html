@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingeniería de Métodos II — Sesión 3: Localización II y Tamaño de Planta (Teoría)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+ onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]});"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>if(!window.THREE){document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>');}</script>
+<style>
+:root{--bg:#04040a;--cyan:#00f0ff;--magenta:#ff2ec4;--yellow:#ffe600;--green:#39ff14;--orange:#ff9500;--purple:#a855f7;--usil:#0b5cab;--card:rgba(255,255,255,.05);--border:rgba(0,240,255,.25)}
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%}
+body{background:var(--bg);color:#eaf6ff;font-family:'Segoe UI',system-ui,Arial,sans-serif;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(1100px 600px at 82% -10%,rgba(0,240,255,.13),transparent 60%),radial-gradient(900px 520px at 8% 110%,rgba(255,46,196,.11),transparent 60%),radial-gradient(700px 420px at 50% 55%,rgba(168,85,247,.08),transparent 60%);animation:hue 14s ease-in-out infinite alternate}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;background-image:radial-gradient(1.5px 1.5px at 25% 35%,rgba(0,240,255,.8) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 75% 65%,rgba(255,46,196,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 50% 20%,rgba(255,230,0,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 12% 78%,rgba(57,255,20,.7) 50%,transparent 51%);background-size:340px 340px,420px 420px,260px 260px,380px 380px;animation:drift 90s linear infinite}
+@keyframes hue{to{filter:hue-rotate(40deg)}}@keyframes drift{to{background-position:340px 680px,-420px 840px,260px -520px,-380px 760px}}
+header{position:fixed;top:0;left:0;right:0;height:64px;z-index:50;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(5,6,16,.93);border-bottom:1px solid var(--border)}
+#logoWrap{background:#fff;border-radius:10px;padding:3px 10px;display:flex;align-items:center;flex-shrink:0}#logoWrap img{height:42px;display:block}
+.brand{font-weight:800;font-size:15px;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.head-info{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;font-size:12px}
+.chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);color:var(--cyan);background:rgba(0,240,255,.06);font-weight:600}
+.chip.doc{border-color:rgba(255,46,196,.45);color:var(--magenta);background:rgba(255,46,196,.07)}
+#progress{position:fixed;top:64px;left:0;height:3px;width:0;z-index:60;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow));box-shadow:0 0 14px var(--cyan);transition:width .45s}
+#stage{position:fixed;inset:64px 0 78px 0;z-index:10}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .55s;overflow-y:auto;padding:28px 5vw 60px}
+.slide.active{opacity:1;pointer-events:auto}
+h1.big{font-size:clamp(26px,4.4vw,54px);line-height:1.05;font-weight:900;background:linear-gradient(90deg,var(--cyan) 10%,var(--magenta) 55%,var(--yellow) 95%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(0,240,255,.35))}
+h2.sec{font-size:clamp(22px,3.2vw,34px);font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#9fd8e8;font-size:15px;margin-bottom:18px;max-width:920px;line-height:1.5}
+.kicker{display:inline-block;font-size:12px;letter-spacing:3px;color:var(--yellow);border:1px solid rgba(255,230,0,.4);padding:5px 14px;border-radius:20px;margin-bottom:14px;background:rgba(255,230,0,.06);text-transform:uppercase;font-weight:700}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;backdrop-filter:blur(6px)}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.neon-c{color:var(--cyan)}.neon-m{color:var(--magenta)}.neon-y{color:var(--yellow)}.neon-g{color:var(--green)}.neon-o{color:var(--orange)}.neon-p{color:var(--purple)}
+.tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:14px;margin:3px 4px 3px 0;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05)}
+.btn{cursor:pointer;border:1px solid var(--cyan);color:var(--cyan);background:rgba(0,240,255,.07);padding:10px 22px;border-radius:10px;font-size:15px;font-weight:700;text-transform:uppercase;transition:.25s;text-decoration:none;display:inline-block}
+.btn:hover{background:rgba(0,240,255,.2);box-shadow:0 0 18px rgba(0,240,255,.5);transform:translateY(-2px)}
+.btn.mg{border-color:var(--magenta);color:var(--magenta);background:rgba(255,46,196,.07)}.btn.yl{border-color:var(--yellow);color:var(--yellow);background:rgba(255,230,0,.07)}.btn.gr{border-color:var(--green);color:var(--green);background:rgba(57,255,20,.07)}
+.btn.sm{padding:6px 14px;font-size:12.5px}.btn.active-opt{background:rgba(0,240,255,.28);box-shadow:0 0 16px rgba(0,240,255,.55)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--magenta));outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--yellow);border:2px solid #000;box-shadow:0 0 12px var(--yellow);cursor:pointer}
+footer{position:fixed;bottom:0;left:0;right:0;height:78px;z-index:50;display:flex;align-items:center;gap:16px;padding:0 22px;background:rgba(5,6,16,.93);border-top:1px solid var(--border)}
+#slideSlider{flex:1}#slideCounter{font-size:13px;color:#9fd8e8;min-width:64px;text-align:center;font-weight:700}
+.stat{font-size:26px;font-weight:900}.stat-lbl{font-size:11.5px;letter-spacing:1.5px;color:#8fb8c6;text-transform:uppercase}
+.tl-item{cursor:pointer;transition:.25s}.tl-item:hover{transform:translateY(-3px);box-shadow:0 0 20px rgba(0,240,255,.25)}
+canvas.view{width:100%;border:1px solid var(--border);border-radius:14px;background:rgba(0,0,10,.5)}
+.center{text-align:center}
+.note{border-left:4px solid var(--yellow);background:rgba(255,230,0,.06);padding:10px 14px;border-radius:0 10px 10px 0;font-size:13.5px;color:#f2ecc0;margin-top:12px}
+.katex{color:#fff}
+.flash .ans{display:none;margin-top:10px;border-left:3px solid var(--green);padding:8px 12px;background:rgba(57,255,20,.08);color:#c9ffd9;font-size:13.5px}
+.flash.open .ans{display:block}
+.aviso{border:2px dashed var(--magenta);background:rgba(255,46,196,.08);border-radius:14px;padding:18px;font-size:17px;font-weight:800;color:var(--magenta);text-align:center;box-shadow:0 0 24px rgba(255,46,196,.25)}
+table.t{width:100%;border-collapse:collapse;font-size:13px;text-align:center}
+table.t th{padding:8px;border-bottom:1px solid rgba(255,230,0,.35);color:var(--yellow)}
+table.t td{padding:7px;border-bottom:1px solid rgba(255,255,255,.08)}
+table.t tr:nth-child(even){background:rgba(255,255,255,.03)}
+table.t th:first-child,table.t td:first-child{text-align:left}
+</style>
+</head>
+<body>
+<header>
+ <div id="logoWrap"><img src="USIL_logo.png" alt="USIL 30 años" onerror="this.onerror=null;this.style.display='none';document.getElementById('logoFallback').style.display='block';">
+  <svg id="logoFallback" viewBox="0 0 250 90" height="42" style="display:none"><text x="2" y="64" font-size="54" font-weight="700" fill="none" stroke="#c9a24b" stroke-width="2.5" font-family="Georgia,serif">30</text><circle cx="88" cy="36" r="24" fill="none" stroke="#c9a24b" stroke-width="3"/><text x="88" y="42" font-size="14" fill="#c9a24b" text-anchor="middle" font-family="Georgia,serif">años</text><text x="118" y="68" font-size="56" font-weight="800" fill="#0b5cab" font-family="Georgia,serif" font-style="italic">USIL</text></svg></div>
+ <div class="brand">⚙ INGENIERÍA DE MÉTODOS II · TEORÍA</div>
+ <div class="head-info"><span class="chip">Sesión 3 · Localización II y Tamaño de Planta</span><span class="chip doc">👷 Eduardo Olivos</span></div>
+</header>
+<div id="progress"></div>
+<div id="stage">
+
+<section class="slide active" id="s0"><div style="min-height:82%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+ <span class="kicker">Sesión 03 · 2026-II</span>
+ <h1 class="big">LOCALIZACIÓN DE PLANTA II Y<br>OPTIMIZACIÓN DEL TAMAÑO</h1>
+ <p class="sub center" style="margin-top:14px">Métodos <b class="neon-c">cualitativos, semicuantitativos y cuantitativos</b> de localización, y el <b class="neon-m">tamaño óptimo de planta</b> que minimiza el costo total en el tiempo.</p>
+ <div class="card"><b class="neon-y">Curso:</b> Ingeniería de Métodos II | <b class="neon-y">Docente:</b> Eduardo Olivos</div>
+ <div class="btnrow" style="justify-content:center;margin-top:26px"><button class="btn" onclick="goTo(1)">▶ Iniciar la clase</button></div>
+</div></section>
+
+<section class="slide" id="s1"><span class="kicker">Hoja de ruta</span><h2 class="sec">🗺 Hoja de ruta de la sesión</h2>
+ <p class="sub">Haz clic en cada bloque:</p>
+ <div class="grid g4">
+  <div class="card tl-item" onclick="goTo(2)"><div class="stat neon-c">🎯</div><div class="stat-lbl">Objetivo y reto</div></div>
+  <div class="card tl-item" onclick="goTo(3)"><div class="stat neon-y">🧭</div><div class="stat-lbl">Métodos cualitativos</div></div>
+  <div class="card tl-item" onclick="goTo(4)"><div class="stat neon-m">⚖</div><div class="stat-lbl">Ranking de factores</div></div>
+  <div class="card tl-item" onclick="goTo(6)"><div class="stat neon-o">🧮</div><div class="stat-lbl">Brown–Gibson</div></div>
+  <div class="card tl-item" onclick="goTo(7)"><div class="stat neon-g">📈</div><div class="stat-lbl">Costo a costo</div></div>
+  <div class="card tl-item" onclick="goTo(8)"><div class="stat neon-p">🏭</div><div class="stat-lbl">Tamaño de planta</div></div>
+  <div class="card tl-item" onclick="goTo(9)"><div class="stat neon-c">💰</div><div class="stat-lbl">CUT y costo descontado</div></div>
+  <div class="card tl-item" onclick="goTo(13)"><div class="stat neon-m">🧊</div><div class="stat-lbl">3D y cierre</div></div>
+ </div>
+ <div class="note">💡 Presentación <b>interactiva</b>: pulsa botones, mueve deslizadores y responde las tarjetas.</div>
+</section>
+
+<section class="slide" id="s2"><span class="kicker">Momento 1 · Utilidad</span><h2 class="sec">🎯 Logro y reto</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Logro de la sesión</h3><p style="font-size:15px;line-height:1.6;margin-top:6px">Aplicar los métodos de <b>evaluación y selección de localización</b> y determinar el <b>tamaño óptimo de planta</b> que minimiza el costo total considerando el tiempo.</p>
+   <h3 class="neon-m" style="margin-top:14px">Reto</h3><p style="font-size:14px;line-height:1.6;margin-top:6px">🏭 Integra ubicación y tamaño: ¿dónde instalar y de qué capacidad, para que el proyecto sea <b>sostenible</b>?</p></div>
+  <div class="card"><h3 class="neon-y">Métodos de evaluación y selección</h3><div style="margin-top:8px"><span class="tag">Cualitativos: antecedentes industriales, factor preferencial, factor dominante</span><span class="tag">Semicuantitativos: ranking de factores, Brown–Gibson</span><span class="tag">Cuantitativo: costo a costo</span></div></div>
+ </div>
+</section>
+
+<section class="slide" id="s3"><span class="kicker">Métodos cualitativos</span><h2 class="sec">🧭 Antecedentes, preferencial y dominante</h2>
+ <p class="sub">Pulsa cada método:</p>
+ <div class="btnrow" id="cualBtns"></div>
+ <div class="card" id="cualInfo" style="min-height:90px"><b class="neon-y">Selecciona un método</b>.</div>
+</section>
+
+<section class="slide" id="s4"><span class="kicker">Semicuantitativo 1</span><h2 class="sec">⚖ Ranking de factores (tabla de enfrentamiento)</h2>
+ <div class="card" style="overflow-x:auto;margin-bottom:14px">
+  <table class="t">
+   <tr><th>FACTOR</th><th>MERC.</th><th>TRANS.</th><th>M.O.</th><th>M.P.</th><th>CONTEO</th><th>PONDERACIÓN</th></tr>
+   <tr><td>Mercado</td><td>—</td><td>1</td><td>1</td><td>1</td><td>3</td><td class="neon-c">37,5</td></tr>
+   <tr><td>Transporte</td><td>0</td><td>—</td><td>1</td><td>0</td><td>1</td><td class="neon-o">12,5</td></tr>
+   <tr><td>Mano de obra</td><td>0</td><td>1</td><td>—</td><td>0</td><td>1</td><td class="neon-o">12,5</td></tr>
+   <tr><td>Materia prima</td><td>1</td><td>1</td><td>1</td><td>—</td><td>3</td><td class="neon-c">37,5</td></tr>
+   <tr style="font-weight:800;color:var(--green)"><td>TOTAL</td><td></td><td></td><td></td><td></td><td>8</td><td>100</td></tr>
+  </table>
+ </div>
+ <div class="note">Reglas: <b>1</b> = más importante · <b>0</b> = menos importante · <b>1</b> = equivalente. Aquí <b>mercado y materia prima dominan</b> (37,5% c/u); transporte y mano de obra son secundarios.</div>
+</section>
+
+<section class="slide" id="s5"><span class="kicker">Calificación de localidades</span><h2 class="sec">📍 Escala y puntaje ponderado</h2>
+ <p class="sub">Escala: Excelente 10 · Muy bueno 8 · Bueno 6 · Regular 4 · Deficiente 2. Pulsa cada localidad:</p>
+ <div class="btnrow" id="locBtns"></div>
+ <div class="card" id="locInfo" style="min-height:90px"><b class="neon-y">Selecciona una localidad</b>.</div>
+ <div class="note">✅ Gana <b>A (900)</b>. El resultado semicuantitativo debe complementarse con el análisis <b>cuantitativo (costo a costo)</b> y el juicio experto.</div>
+</section>
+
+<section class="slide" id="s6"><span class="kicker">Semicuantitativo 2</span><h2 class="sec">🧮 Brown–Gibson</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Factores objetivos (FO)</h3>
+   $$FO_i=\frac{1/C_i}{\sum_{i}(1/C_i)}$$
+   <p style="font-size:13px;margin-top:6px;color:#bfe9f5">Se valora cada localidad con el <b>inverso de su costo</b> anual.</p>
+   <h3 class="neon-m" style="margin-top:12px">Factores subjetivos (FS)</h3>
+   <p style="font-size:13px;color:#bfe9f5">Escala: Excelente 2 · Bueno 1 · Deficiente 0. En el ejemplo: clima 0,5 · vivienda 0,25 · educación 0,25.</p></div>
+  <div class="card"><h3 class="neon-y">Ponderación K y MPL</h3>
+   <div class="flash"><b class="neon-c">K = 0,75: ¿qué significa?</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Los factores <b>objetivos</b> se consideran <b>tres veces más importantes</b> que los subjetivos.</div></div>
+   <div class="flash"><b class="neon-m">MPL: A 0,3123 · B 0,3656 · C 0,3222</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Gana <b>B</b>: es la mejor localización al <b>combinar</b> factores objetivos y subjetivos.</div></div>
+   <div class="note">MPL = K·FO + (1−K)·FS.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s7"><span class="kicker">Cuantitativo</span><h2 class="sec">📈 Costo a costo (punto de equilibrio)</h2>
+ <p class="sub">Mueve el <b>volumen Q</b> y mira qué ubicación conviene (A: 100,000+8Q · B: 200,000+5Q · equilibrio ≈ 33,333):</p>
+ <input type="range" id="beSlider" min="0" max="60000" value="20000" step="1000" style="width:100%;max-width:700px" oninput="drawBE(+this.value)">
+ <div class="card" id="beLabel" style="margin:10px 0;min-height:46px"></div>
+ <div class="card"><canvas id="beChart" style="height:260px"></canvas></div>
+</section>
+
+<section class="slide" id="s8"><span class="kicker">Tamaño de planta</span><h2 class="sec">🏭 Capacidad instalada, no área física</h2>
+ <div class="card" style="margin-bottom:14px"><p style="font-size:14.5px;line-height:1.6">El tamaño de planta se define por su <b class="neon-c">capacidad instalada de producción por unidad de tiempo</b>, no por sus m². Una planta puede ser físicamente grande pero de baja capacidad, o pequeña pero de alta capacidad.</p></div>
+ <p class="sub">Factores que <b>limitan</b> el tamaño — pulsa cada uno:</p>
+ <div class="btnrow" id="limBtns"></div>
+ <div class="card" id="limInfo" style="min-height:80px"><b class="neon-y">Selecciona un factor</b>.</div>
+</section>
+
+<section class="slide" id="s9"><span class="kicker">Canvas 2D · Interactivo</span><h2 class="sec">💰 Costo Unitario Total (CUT)</h2>
+ <p class="sub">Mueve el deslizador entre los niveles de capacidad (5,000 / 10,000 / 15,000 u):</p>
+ $$CUT_Q=\frac{CF}{Q}+CVU$$
+ <input type="range" id="cutSlider" min="1" max="3" value="1" step="1" style="width:100%;max-width:500px" oninput="drawCUT(+this.value)">
+ <div class="card" id="cutLabel" style="margin:10px 0;min-height:46px"></div>
+ <canvas id="cutCanvas" class="view" style="height:240px"></canvas>
+ <div class="note">📉 El CUT baja con la escala: los <b>costos fijos se prorratean</b> entre más unidades (economías de escala). El mínimo (6,67) corresponde a 15,000 u.</div>
+</section>
+
+<section class="slide" id="s10"><span class="kicker">Costo total descontado</span><h2 class="sec">🧾 Inversión + costos operativos (valor presente)</h2>
+ <div class="grid g2">
+  <div class="card"><h3 class="neon-c">Datos (i = 10%, n = 5, FVA = 3,791)</h3><ul style="font-size:13.5px;line-height:2;padding-left:18px"><li><b>Planta A:</b> I = 90,000 · op. 22,000 · mant. 6,000.</li><li><b>Planta B:</b> I = 140,000 · op. 16,000 · mant. 5,000.</li></ul>
+   <h3 class="neon-y" style="margin-top:10px">Cálculo</h3>
+   $$CT_A=90{,}000+28{,}000(3,791)=196{,}148$$
+   $$CT_B=140{,}000+21{,}000(3,791)=219{,}611$$</div>
+  <div class="card"><h3 class="neon-m">Interpretación (pulsa)</h3>
+   <div class="flash"><b class="neon-c">¿Por qué se descuentan los costos futuros?</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Porque el dinero tiene <b>valor en el tiempo</b>: un costo futuro vale menos hoy.</div></div>
+   <div class="flash"><b class="neon-g">¿Cuál se elige?</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans"><b>A</b>: menor costo total. La alta inversión de B <b>no se justifica</b> en el horizonte analizado.</div></div>
+   <div class="note">🔑 “El tamaño óptimo no siempre es el más grande ni el más eficiente, sino el que <b>minimiza el costo total considerando el tiempo</b>.”</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s11"><span class="kicker">Punto de equilibrio</span><h2 class="sec">📊 Volumen mínimo de rentabilidad</h2>
+ <div class="card" style="margin-bottom:14px"><p style="font-size:14.5px;line-height:1.6">El <b class="neon-c">Punto de Equilibrio</b> es el volumen mínimo de ventas donde los <b>ingresos igualan los costos totales</b>; por debajo hay pérdidas.</p>
+ <h3 class="neon-y" style="margin-top:10px">Fórmula</h3>
+ $$PE=\frac{CF}{P-CVU}$$</div>
+ <div class="card flash"><b class="neon-m">🤔 ¿Por qué el PE asegura la viabilidad operativa?</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Porque indica cuántas unidades deben venderse para <b>cubrir todos los gastos</b>; producir por debajo implica pérdidas sostenidas.</div></div>
+</section>
+
+<section class="slide" id="s12"><span class="kicker">Alternativas de tamaño</span><h2 class="sec">🏗 Empresas A · B · C</h2>
+ <div class="grid g3">
+  <div class="card"><b class="neon-c">Empresa A</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Planta flexible: inversión alta (350k), costos decrecientes.</p></div>
+  <div class="card"><b class="neon-g">Empresa B</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Planta balanceada: <b>equilibrio óptimo</b> (250k).</p></div>
+  <div class="card"><b class="neon-m">Empresa C</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Alta capacidad futura: inversión muy alta (600k), costos crecientes.</p></div>
+ </div>
+ <div class="note">🧩 <b>Diseños modulares y flexibles</b> permiten adaptarse a demandas futuras y cambios tecnológicos sin sobredimensionar.</div>
+</section>
+
+<section class="slide" id="s13"><span class="kicker">Three.js · 3D</span><h2 class="sec">🧊 Tamaños y óptimo</h2>
+ <p class="sub">Pulsa para enfocar cada alternativa:</p>
+ <div class="btnrow">
+  <button class="btn sm" onclick="focus3D(0)">Pequeña</button>
+  <button class="btn sm mg" onclick="focus3D(1)">Balanceada</button>
+  <button class="btn sm yl" onclick="focus3D(2)">Grande</button>
+  <button class="btn sm gr" onclick="focus3D(3)">Tamaño óptimo</button>
+ </div>
+ <canvas id="threeCanvas" class="view" style="height:300px"></canvas>
+ <div class="card" id="threeDesc" style="margin-top:12px"><b class="neon-c">Escena 3D:</b> el óptimo minimiza el costo total en el tiempo, no el mayor tamaño.</div>
+</section>
+
+<section class="slide" id="s14"><span class="kicker">Repaso · respuestas ocultas</span><h2 class="sec">🎯 Tarjetas de repaso</h2>
+ <div class="grid g2">
+  <div class="card flash"><b class="neon-c">1.</b> ¿Qué hace el ranking de factores?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Compara factores dos a dos y asigna ponderaciones que suman 100.</div></div>
+  <div class="card flash"><b class="neon-m">2.</b> ¿Qué significa K = 0,75 en Brown–Gibson?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Los factores objetivos pesan tres veces más que los subjetivos.</div></div>
+  <div class="card flash"><b class="neon-y">3.</b> ¿Cómo se define el tamaño de planta?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">Por su capacidad instalada de producción por unidad de tiempo, no por su área física.</div></div>
+  <div class="card flash"><b class="neon-g">4.</b> ¿Cuál es el tamaño óptimo?<button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans">El que minimiza el costo total considerando el tiempo; no siempre el más grande.</div></div>
+ </div>
+</section>
+
+<section class="slide" id="s15"><span class="kicker">Actividad</span><h2 class="sec">✍ Actividad grupal (Canvas · Semana 3)</h2>
+ <div class="card"><p style="font-size:15px;line-height:1.7">En grupo, desarrollen en el <b>Canvas</b> la <b>selección de la ubicación</b> y el <b>análisis de producción</b>: ranking de factores, Brown–Gibson, costo a costo, CUT y punto de equilibrio.</p></div>
+ <div class="card flash" style="margin-top:14px"><b class="neon-y">🤔 Si el CUT mínimo corresponde a 15,000 u pero la demanda real es 5,000 u, ¿conviene construir para 15,000?</b><button class="btn sm gr" style="margin-left:10px" onclick="this.parentNode.classList.toggle('open')">Ver</button><div class="ans"><b>No</b>: el tamaño debe ajustarse a la demanda; producir 5,000 en una planta de 15,000 genera <b>capacidad ociosa</b> que eleva el CUT real.</div></div>
+</section>
+
+<section class="slide" id="s16"><span class="kicker">Síntesis</span><h2 class="sec">📈 Conclusiones</h2>
+ <div class="grid g4">
+  <div class="card"><b class="neon-c">Integrar</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Criterios cualitativos y cuantitativos en la localización.</p></div>
+  <div class="card"><b class="neon-m">Tamaño óptimo</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Balancea mercado, tecnología y finanzas.</p></div>
+  <div class="card"><b class="neon-g">Eficiencia</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Minimizar costos unitarios y maximizar el VAN.</p></div>
+  <div class="card"><b class="neon-y">PE</b><p style="font-size:12.5px;margin-top:6px;color:#bfe9f5">Asegura la rentabilidad mínima operativa.</p></div>
+ </div>
+ <div class="card" style="margin-top:14px"><h3 class="neon-y">📚 Referencias</h3><p style="font-size:13px;line-height:1.9;color:#bfe9f5">Niebel, B. (2014). Ingeniería industrial: métodos, estándares y diseño del trabajo (13a ed.). McGraw‑Hill.</p></div>
+</section>
+
+<section class="slide" id="s17"><div style="min-height:80%;display:flex;flex-direction:column;justify-content:center">
+ <span class="kicker">Cierre</span><h2 class="sec">🏁 Ideas fuerza</h2>
+ <div class="grid g4" style="margin:16px 0">
+  <div class="card"><b class="neon-c">Dominante</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Un factor (MP, mercado, norma) puede condicionar todo.</p></div>
+  <div class="card"><b class="neon-m">Ranking/B‑G</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">Ponderan lo cualitativo y lo objetivo.</p></div>
+  <div class="card"><b class="neon-g">CUT</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">La escala proratea fijos; pero manda la demanda.</p></div>
+  <div class="card"><b class="neon-y">Tiempo</b><p style="font-size:13px;margin-top:6px;color:#bfe9f5">El óptimo minimiza el costo total descontado.</p></div>
+ </div>
+ <div class="aviso" style="margin-top:26px">📢 ESTÉN ATENTOS AL INICIO DE LA EVALUACIÓN EN CLASE</div>
+ <p class="center" style="margin-top:16px;font-size:20px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow));-webkit-background-clip:text;background-clip:text;color:transparent">¡MUCHAS GRACIAS! ⚙✨</p>
+</div></section>
+</div>
+
+<footer>
+ <button class="btn sm" onclick="goTo(current-1)">◀ Anterior</button>
+ <input type="range" id="slideSlider" min="0" max="17" value="0" oninput="goTo(+this.value)">
+ <button class="btn sm" onclick="goTo(current+1)">Siguiente ▶</button>
+ <span id="slideCounter">1 / 18</span>
+</footer>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];let current=0;
+const slider=document.getElementById('slideSlider');slider.max=slides.length-1;
+function goTo(i){if(i<0||i>=slides.length)return;slides[current].classList.remove('active');current=i;slides[current].classList.add('active');slides[current].scrollTop=0;slider.value=i;document.getElementById('slideCounter').textContent=(i+1)+' / '+slides.length;document.getElementById('progress').style.width=(i/(slides.length-1)*100)+'%';onSlideEnter(i);}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'&&e.target.type!=='range')return;if(e.key==='ArrowRight')goTo(current+1);if(e.key==='ArrowLeft')goTo(current-1);});
+function makeBtns(id,infoId,data){const c=document.getElementById(id);data.forEach((d,i)=>{const b=document.createElement('button');b.className='btn sm'+(i%2?' mg':'');b.textContent=d[0];b.onclick=()=>{c.querySelectorAll('.btn').forEach(x=>x.classList.remove('active-opt'));b.classList.add('active-opt');document.getElementById(infoId).innerHTML='<b class="neon-c">'+d[0]+'</b><p style="margin-top:6px;font-size:14px;color:#d9f3fb">'+d[1]+'</p>';};c.appendChild(b);});}
+makeBtns('cualBtns','cualInfo',[['Antecedentes industriales','Si en un área existen industrias similares a la que se pretende instalar, se supone que la zona es adecuada para el proyecto.'],['Factor preferencial','Aspectos subjetivos (políticos, sociales, estratégicos) que inclinan la decisión hacia una ubicación, aunque no sea la de menor costo.'],['Factor dominante','Un factor condiciona totalmente la ubicación: la materia prima en minería, o la Denominación de Origen del Pisco.']]);
+makeBtns('locBtns','locInfo',[['Localidad A','37,5(10)+12,5(8)+12,5(4)+37,5(10) = 375+100+50+375 = <b>900</b>'],['Localidad B','37,5(8)+12,5(10)+12,5(4)+37,5(2) = 300+125+50+75 = <b>550</b>']]);
+makeBtns('limBtns','limInfo',[['Mercado','La demanda limita el tamaño: no conviene producir más de lo que se puede colocar.'],['Tecnología','La capacidad mínima de la tecnología disponible acota el tamaño mínimo de planta.'],['Insumos','La escasez de mano de obra calificada, materias primas, agua y energía limita el crecimiento.'],['Financiamiento','El capital disponible restringe la inversión y, por tanto, el tamaño.']]);
+/* Canvas CUT */
+const cutData=[{q:'5,000',cf:20000,cvu:4,cut:8},{q:'10,000',cf:35000,cvu:3.5,cut:7},{q:'15,000',cf:55000,cvu:3,cut:6.67}];
+function drawCUT(n){const cv=document.getElementById('cutCanvas');const dpr=window.devicePixelRatio||1;const W=cv.clientWidth,H=240;cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
+ const bw=Math.min(120,(W-120)/3);
+ cutData.forEach((d,i)=>{const bx=40+i*((W-80)/3);const bh=(d.cut/8)*(H-70);const by=H-40-bh;
+  x.save();if(i===n-1){x.shadowColor='#ffe600';x.shadowBlur=18;}x.fillStyle=i===n-1?'rgba(255,230,0,.35)':'rgba(0,240,255,.18)';x.strokeStyle=i===n-1?'#ffe600':'#00f0ff';x.lineWidth=2;x.beginPath();x.roundRect(bx,by,bw,bh,8);x.fill();x.stroke();x.restore();
+  x.fillStyle='#eaf6ff';x.font='bold 14px Segoe UI';x.textAlign='center';x.fillText(d.cut.toFixed(2),bx+bw/2,by-8);
+  x.fillStyle='#9fd8e8';x.font='11px Segoe UI';x.fillText(d.q+' u',bx+bw/2,H-22);});
+ const d=cutData[n-1];
+ document.getElementById('cutLabel').innerHTML='<b class="neon-c">▶</b> Q='+d.q+' → CUT = '+d.cf.toLocaleString()+'/'+d.q.replace(',','')+' + '+d.cvu+' = <b class="neon-y">'+d.cut.toFixed(2)+'</b>'+(n===3?' · <b class="neon-g">MENOR CUT (más eficiente)</b>':'');}
+/* Chart costo a costo */
+let beChart=null;
+function drawBE(q){const A=100000+8*q,B=200000+5*q;const best=A<=B?'Ciudad A':'Ciudad B';
+ document.getElementById('beLabel').innerHTML='<b class="neon-c">▶</b> Q='+q.toLocaleString()+' → A=$'+(A/1000).toFixed(0)+'k · B=$'+(B/1000).toFixed(0)+'k · Conviene: <b class="neon-g">'+best+'</b>'+(Math.abs(q-33333)<1500?' · <b class="neon-y">PUNTO DE EQUILIBRIO</b>':'');
+ if(!window.Chart)return;
+ const vols=[0,10000,20000,33333,40000,50000,60000];
+ const dA=vols.map(v=>100000+8*v),dB=vols.map(v=>200000+5*v);
+ if(!beChart){beChart=new Chart(document.getElementById('beChart'),{type:'line',data:{labels:vols,datasets:[{label:'Ciudad A',data:dA,borderColor:'#00f0ff',backgroundColor:'rgba(0,240,255,.12)',borderWidth:2,pointRadius:2},{label:'Ciudad B',data:dB,borderColor:'#ff2ec4',backgroundColor:'rgba(255,46,196,.12)',borderWidth:2,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#d9f3fb'}}},scales:{x:{title:{display:true,text:'Volumen Q (unidades/año)',color:'#9fd8e8'},ticks:{color:'#9fd8e8'},grid:{color:'rgba(255,255,255,.06)'}},y:{title:{display:true,text:'Costo total ($)',color:'#9fd8e8'},ticks:{color:'#9fd8e8'},grid:{color:'rgba(255,255,255,.08)'}}}}});}
+ else{beChart.data.datasets[0].data=dA;beChart.data.datasets[1].data=dB;beChart.update('none');}}
+/* Three.js */
+let threeReady=false,threeFocus=-1,threeMeshes=[],threeGroup=null,threeRenderer,threeScene,threeCam;
+const defs3=[{col:0x00f0ff,d:'<b class="neon-c">PEQUEÑA:</b> menor inversión, mayores costos operativos.'},{col:0xff2ec4,d:'<b class="neon-m">BALANCEADA:</b> equilibrio óptimo (Empresa B).'},{col:0xffe600,d:'<b class="neon-y">GRANDE:</b> alta inversión para demanda futura; puede no justificarse.'},{col:0x39ff14,d:'<b class="neon-g">TAMAÑO ÓPTIMO:</b> minimiza el costo total considerando el tiempo.'}];
+function initThree(){if(threeReady)return;if(!window.THREE)return;
+ try{const cv=document.getElementById('threeCanvas');const r=cv.getBoundingClientRect();const w=r.width||800,h=r.height||300;
+ threeRenderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});threeRenderer.setClearColor(0x000000,0);threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));threeRenderer.setSize(w,h,false);
+ threeScene=new THREE.Scene();threeCam=new THREE.PerspectiveCamera(50,w/h,.1,100);threeCam.position.set(0,3,9);threeCam.lookAt(0,0.8,0);
+ threeScene.add(new THREE.AmbientLight(0xffffff,.85));const p1=new THREE.PointLight(0x66ccff,1.2,80);p1.position.set(8,8,8);threeScene.add(p1);
+ const grid=new THREE.GridHelper(16,16,0x1b6fb0,0x0e3a66);grid.position.y=-0.2;threeScene.add(grid);
+ threeGroup=new THREE.Group();threeScene.add(threeGroup);
+ const hs=[0.9,1.4,2.0];
+ hs.forEach((hh,i)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(1.4,hh,1.4),new THREE.MeshPhongMaterial({color:defs3[i].col,emissive:defs3[i].col,emissiveIntensity:.35,shininess:90}));m.position.set((i-1)*2.6,hh/2,0);threeGroup.add(m);threeMeshes.push(m);});
+ const cg=new THREE.Mesh(new THREE.SphereGeometry(.45,32,32),new THREE.MeshPhongMaterial({color:0x39ff14,emissive:0x39ff14,emissiveIntensity:.7}));cg.position.set(0,2.1,0);threeGroup.add(cg);threeMeshes.push(cg);
+ let drag=false,px=0,py=0;
+ cv.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;});
+ cv.addEventListener('pointermove',e=>{if(!drag)return;threeGroup.rotation.y+=(e.clientX-px)*.008;px=e.clientX;py=e.clientY;});
+ ['pointerup','pointerleave'].forEach(ev=>cv.addEventListener(ev,()=>drag=false));
+ (function anim(t){requestAnimationFrame(anim);if(!drag)threeGroup.rotation.y+=.0035;
+  threeMeshes.forEach((m,i)=>{m.position.y+=(Math.sin((t||0)*.0012+i)*.15+(i<3?[0.45,0.7,1.0][i]:2.1)-m.position.y)*.1;const tg=(threeFocus===i)?1.4:((threeFocus===-1)?1:.8);m.scale.lerp(new THREE.Vector3(tg,tg,tg),.08);m.material.emissiveIntensity+=(((threeFocus===i)?.75:.35)-m.material.emissiveIntensity)*.08;});
+  threeRenderer.render(threeScene,threeCam);})();
+ threeReady=true;}catch(e){}}
+function focus3D(i){threeFocus=(threeFocus===i)?-1:i;document.getElementById('threeDesc').innerHTML=threeFocus===-1?'<b class="neon-c">Escena 3D:</b> el óptimo minimiza el costo total en el tiempo, no el mayor tamaño.':defs3[i].d;}
+function onSlideEnter(i){const id=slides[i].id;
+ if(id==='s7')drawBE(+document.getElementById('beSlider').value);
+ if(id==='s9')drawCUT(+document.getElementById('cutSlider').value);
+ if(id==='s13')setTimeout(initThree,120);}
+addEventListener('resize',()=>{const id=slides[current].id;if(id==='s7')drawBE(+document.getElementById('beSlider').value);if(id==='s9')drawCUT(+document.getElementById('cutSlider').value);if(id==='s13'&&threeRenderer){const r=document.getElementById('threeCanvas').getBoundingClientRect();threeRenderer.setSize(r.width,r.height,false);threeCam.aspect=r.width/r.height;threeCam.updateProjectionMatrix();}});
+goTo(0);
+</script>
+</body>
+</html>
